@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, UserPen } from "lucide-react";
+import { Heart, ShoppingCart, UserPen } from "lucide-react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { menu } from "../../../constant/Headerconstant";
@@ -14,6 +14,8 @@ const Header = () => {
   const isAuthenticated = useSelector((state) => state.user.token)?.length > 0;
   const userInfo = useSelector((state) => state.user);
   const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const wishlistCount = wishlistItems.length;
 
   const accountItem = menu.find((item) => item.name === "Account");
   const otherItems = menu.filter((item) => item.name !== "Account");
@@ -54,6 +56,14 @@ const Header = () => {
           <div className="relative flex items-center gap-4">
             {isAuth ? (
               <>
+                <Link to="/wishlist" className="relative">
+                  <Heart className="h-6 w-6 hover:text-blue-600" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
                 <Link to="/cart" className="relative">
                   <ShoppingCart className="h-6 w-6 hover:text-blue-600" />
                   {itemCount > 0 && (
@@ -97,6 +107,14 @@ const Header = () => {
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                         >
                           My Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/myorders"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          My Orders
                         </Link>
                       </li>
                       <li>

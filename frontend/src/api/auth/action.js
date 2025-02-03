@@ -56,6 +56,37 @@ export const useRegister = () => {
   });
 };
 
+
+export const useMerchantRegister = () => {
+  return useMutation({
+    mutationKey: ["MerchantSignUp"],
+    mutationFn: async (userData) => {
+      try {
+        console.log("Merchant SignUp Data:", userData);
+        
+        const response = await axiosInstance.post("/merchants", userData, {
+          headers: {
+            "Content-Type": "multipart/form-data", // Ensure form-data format
+          },
+        });
+
+        toast.success("Merchant registered successfully!");
+        console.log("Merchant Signup Response:", response.data);
+
+        return response.data;
+      } catch (error) {
+        toast.error(
+          `Error during merchant signup: ${
+            error.response?.data?.msg || error.message
+          }`
+        );
+        throw error;
+      }
+    },
+  });
+};
+
+
 // Get User Query
 export const useGetUser = () => {
   return useQuery(["user"], async () => {

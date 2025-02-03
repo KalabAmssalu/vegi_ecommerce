@@ -8,17 +8,15 @@ import path from "path"; // For handling file paths
 export const createMerchant = async (req, res) => {
   try {
     // Validate request input
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    console.log("Merchant SignUp", req.body);
+ 
 
     // Handle file upload
     const trade_permit = req.file;
     if (!trade_permit) {
       return res.status(400).json({ msg: "Trade permit file is required" });
     }
-
+//111
     // Set the image URL
     const tradePermitPath = path.join("uploads", trade_permit.filename);
 

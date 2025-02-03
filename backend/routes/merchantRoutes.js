@@ -16,8 +16,6 @@ const router = express.Router();
 // Create a new merchant (Admin and Manager only)
 router.post(
   "/",
-  auth, // Authenticate the user
-  authorizeMultipleRoles(["Admin", "Manager"], "merchants", "WRITE"), // Only Admins and Managers can create merchants
   upload.single("trade_permit"),
   createMerchant
 );

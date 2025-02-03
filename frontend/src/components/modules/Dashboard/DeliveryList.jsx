@@ -1,100 +1,115 @@
-// src/components/DeliveryList.js
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Eye } from "lucide-react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const initialDeliveries = [
-  {
-    id: 1,
-    createdAt: "2024-07-19",
-    customer: "John Doe",
-    total: 27.44,
-    status: "Pending",
-  },
-  {
-    id: 2,
-    createdAt: "2024-07-20",
-    customer: "Jane Smith",
-    total: 15.99,
-    status: "Delivered",
-  },
-  {
-    id: 3,
-    createdAt: "2024-07-21",
-    customer: "Alice Johnson",
-    total: 33.43,
-    status: "Pending",
-  },
-];
-
-const DeliveryList = () => {
-  const [deliveries, setDeliveries] = useState(initialDeliveries);
-
-  const handleStatusChange = (id) => {
-    setDeliveries((prevDeliveries) =>
-      prevDeliveries.map((delivery) =>
-        delivery.id === id ? { ...delivery, status: "Delivered" } : delivery
-      )
-    );
-  };
+const DeliveryListTable = () => {
+  // Sample data for the table
+  const navigate = useNavigate();
+  const deliveries = [
+    {
+      id: 1,
+      trackingNumber: "TRK123456",
+      customerName: "John Doe",
+      deliveryAddress: "123 Main St, New York, NY",
+      status: "Delivered",
+      deliveryDate: "2023-10-15",
+    },
+    {
+      id: 2,
+      trackingNumber: "TRK789012",
+      customerName: "Jane Smith",
+      deliveryAddress: "456 Elm St, Los Angeles, CA",
+      status: "In Transit",
+      deliveryDate: "2023-10-16",
+    },
+    {
+      id: 3,
+      trackingNumber: "TRK345678",
+      customerName: "Alice Johnson",
+      deliveryAddress: "789 Oak St, Chicago, IL",
+      status: "Pending",
+      deliveryDate: "2023-10-17",
+    },
+  ];
 
   return (
-    <div className="flex items-center justify-center min-h-screen ">
-      <div className="w-full max-w-5xl p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <h2 className="text-2xl font-semibold p-6 bg-gray-800 text-white">
           Delivery List
         </h2>
-        <table className="min-w-full bg-white border rounded-lg">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Order ID</th>
-              <th className="py-2 px-4 border-b">Created At</th>
-              <th className="py-2 px-4 border-b">Customer</th>
-              <th className="py-2 px-4 border-b">Total</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {deliveries.map((delivery) => (
-              <tr key={delivery.id}>
-                <td className="py-2 px-4 border-b text-center">
-                  {delivery.id}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {delivery.createdAt}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {delivery.customer}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  ${delivery.total.toFixed(2)}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {delivery.status}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {delivery.status === "Pending" && (
-                    <button
-                      onClick={() => handleStatusChange(delivery.id)}
-                      className="text-white bg-primary hover:bg-blue-700 px-3 py-1 rounded"
-                    >
-                      Mark as Delivered
-                    </button>
-                  )}
-                  <Link
-                    to={`/order/${delivery.id}`}
-                    className="ml-4 text-blue-500 hover:underline"
-                  >
-                    View Details
-                  </Link>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tracking Number
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Customer Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Delivery Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Delivery Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {deliveries.map((delivery) => (
+                <tr key={delivery.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {delivery.trackingNumber}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {delivery.customerName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {delivery.deliveryAddress}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        delivery.status === "Delivered"
+                          ? "bg-green-100 text-green-800"
+                          : delivery.status === "In Transit"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {delivery.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {delivery.deliveryDate}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <button
+                      className="text-gray-500 hover:text-gray-700 transition-colors"
+                      onClick={() => {
+                        // Handle detail view action
+                        navigate(`/delivery-order/${delivery.id}`);
+                        console.log("View details for:", delivery.trackingNumber);
+                      }}
+                    >
+                      <Eye className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 };
 
-export default DeliveryList;
+export default DeliveryListTable;

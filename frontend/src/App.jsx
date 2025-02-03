@@ -8,6 +8,11 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Wishlist from "./components/modules/Whishlist";
 import Cart from "./components/modules/Cart";
 import ProductList from "./components/modules/ProductList";
+import DeliveryPersonOrderDetail from "./components/modules/Dashboard/DeliveryOrderDetail";
+import ProductListTable from "./components/modules/Dashboard/ProductList";
+import ProductDetailMerchant from "./components/modules/Dashboard/ProductDetailMerchant";
+import CustomerOrderList from "./components/modules/CustomerOrderList";
+import OrderDetail from "./components/modules/Dashboard/OrderDetail";
 
 // Lazy-loaded components
 const Landing = lazy(() => import("./components/screens/landingPage/Landing"));
@@ -50,7 +55,7 @@ const AboutusPage = lazy(() =>
 const Dashboard = lazy(() =>
   import("./components/modules/Dashboard/Dashboard")
 );
-const OrderDetail = lazy(() =>
+const DeliveryOrderDetail = lazy(() =>
   import("./components/modules/Dashboard/OrderDetail")
 );
 const OrderList = lazy(() =>
@@ -96,6 +101,22 @@ const App = () => (
           }
         />
         <Route
+          path="/myorders"
+          element={
+            <PrivateRoute>
+              <CustomerOrderList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/myorders/:id"
+          element={
+            <PrivateRoute>
+              <OrderDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/orders"
           element={
             <PrivateRoute>
@@ -104,10 +125,34 @@ const App = () => (
           }
         />
         <Route
+          path="/myproducts"
+          element={
+            <PrivateRoute>
+              <ProductListTable />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/myproducts/:id"
+          element={
+            <PrivateRoute>
+              <ProductDetailMerchant />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/order/:id"
           element={
             <PrivateRoute>
-              <OrderDetail />
+              <DeliveryOrderDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/delivery-order/:id"
+          element={
+            <PrivateRoute>
+              <DeliveryPersonOrderDetail />
             </PrivateRoute>
           }
         />
@@ -116,14 +161,6 @@ const App = () => (
           element={
             <PrivateRoute>
               <DeliveryList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Delivery_order/:id"
-          element={
-            <PrivateRoute>
-              <OrderDetail />
             </PrivateRoute>
           }
         />

@@ -1,50 +1,40 @@
 // src/components/common/Sidebar/SideBar.js
+import { ShoppingBasket } from "lucide-react";
 import React from "react";
-import { Reyan } from "../../../assets/images/Index";
-import { CalendarArrowUp, PackageCheck, Truck } from "lucide-react";
+import { FaTruck, FaBox, FaPlus, FaUser, FaList } from "react-icons/fa";
 
-const SideBar = ({ setCurrentView }) => {
+const SideBar = ({ role, setCurrentView, currentView }) => {
+  const merchantTabs = [
+    { id: "add-product", label: "Add Product", icon: <FaPlus /> },
+    { id: "myproducts", label: "My Product", icon: <ShoppingBasket /> },
+    { id: "orders", label: "Orders", icon: <FaList /> },
+    { id: "delivery-list", label: "Delivery List", icon: <FaTruck /> },
+    { id: "user-profile", label: "Profile", icon: <FaUser /> },
+  ];
+
+  const deliveryPersonTabs = [
+    { id: "delivery-list", label: "Delivery List", icon: <FaTruck /> },
+    { id: "user-profile", label: "Profile", icon: <FaUser /> },
+  ];
+
+  const tabs = role === "merchant" ? merchantTabs : deliveryPersonTabs;
+
   return (
-    <div className="flex flex-col gap-12 justify-start">
-      <div className="flex flex-col justify-center items-center ">
+    <div className="p-4 space-y-2">
+      {tabs.map((tab) => (
         <button
-          className="gap-2 hover:text-red-700"
-          onClick={() => setCurrentView("user-profile")}
+          key={tab.id}
+          onClick={() => setCurrentView(tab.id)}
+          className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+            currentView === tab.id
+              ? "bg-primary text-white"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
         >
-          <img
-            className="w-32 h-32 rounded-full ring-4 ring-primary "
-            src={Reyan}
-            alt="Bordered avatar"
-          />
+          <span className="text-lg">{tab.icon}</span>
+          <span className="text-sm font-medium">{tab.label}</span>
         </button>
-        Profile
-      </div>
-
-      <div className="w-[300px] py-10 px-4">
-        <ul className="space-y-4">
-          <li
-            className="rounded-2xl flex items-center gap-4 bg-primary p-2 pl-4 text-white cursor-pointer"
-            onClick={() => setCurrentView("delivery-list")}
-          >
-            <Truck size={20} />
-            <span>Delivery</span>
-          </li>
-          <li
-            className="rounded-2xl flex items-center gap-4 bg-primary p-2 pl-4 text-white cursor-pointer"
-            onClick={() => setCurrentView("add-product")}
-          >
-            <PackageCheck size={20} />
-            <span>Your Product</span>
-          </li>
-          <li
-            className="rounded-2xl flex items-center gap-4 bg-primary p-2 pl-4 text-white cursor-pointer"
-            onClick={() => setCurrentView("orders")}
-          >
-            <CalendarArrowUp size={20} />
-            <span>Order</span>
-          </li>
-        </ul>
-      </div>
+      ))}
     </div>
   );
 };

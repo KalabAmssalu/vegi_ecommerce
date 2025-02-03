@@ -1,16 +1,20 @@
 import React, { useState } from "react";
 import { Bg } from "../../../../assets/images/Index";
+import { flattenFormData } from "../../../../lib/flattendData";
+import { useMerchantRegister } from "../../../../api/auth/action";
+import { useNavigate } from "react-router-dom";
+
 const Signup_merchant = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    MerchatId: "",
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
     phoneNumber: "",
     address: "",
     password: "",
-    permit: "",
+    trade_permit: null,
+    role: "merchant",
   });
 
   const handleChange = (e) => {
@@ -20,12 +24,31 @@ const Signup_merchant = () => {
     });
   };
 
+  const handleFileUpload = (e) => {
+    const { name, files } = e.target;
+    if (files.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0], // Store the actual File object
+      }));
+    }
+  };
+
+  const { mutate: registerMerchant } = useMerchantRegister();
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Form Data:", formData);
-  };
+    const data = flattenFormData(formData); // Flatten form data properly
 
+    registerMerchant(data, {
+      onSuccess: () => {
+        navigate("/signUp");
+      },
+      onError: (error) => {
+        console.log("error", error);
+      },
+    });
+  };
   return (
     <div
       className="flex items-center justify-center min-h-screen bg-contain"
@@ -61,17 +84,6 @@ const Signup_merchant = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <div>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Username"
-              />
-            </div>
             <div>
               <input
                 type="text"
@@ -125,12 +137,13 @@ const Signup_merchant = () => {
             </label>
             <input
               type="file"
-              name="permit"
-              onChange={handleChange}
+              name="trade_permit"
+              onChange={handleFileUpload}
               required
               className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
+
           <button
             type="submit"
             className="w-full py-2 font-medium text-white bg-primary rounded-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

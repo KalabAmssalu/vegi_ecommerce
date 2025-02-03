@@ -7,14 +7,17 @@ import AddProduct from "../../screens/merchant/AddProduct";
 import OrderList from "./OrderList";
 import DeliveryList from "./DeliveryList";
 import UserProfile from "../../screens/auth/user/UserProfile";
+import ProductListTable from "./ProductList";
 
-const Dashboard = () => {
+const Dashboard = ({ role = "merchant" }) => {
   const [currentView, setCurrentView] = useState("delivery-list");
 
   const renderContent = () => {
     switch (currentView) {
       case "add-product":
         return <AddProduct />;
+      case "myproducts":
+        return <ProductListTable />;
       case "orders":
         return <OrderList />;
       case "delivery-list":
@@ -27,19 +30,24 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="w-[100%]">
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Header */}
       <Header />
-      <div className="flex">
-        {/* Full screen */}
-        <div className="w-[30%] border-r-4 border-primary my-4 h-screen flex justify-center items-start pt-10">
-          {/* left  */}
-          <SideBar setCurrentView={setCurrentView} />
+
+      {/* Main Content */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <div className="w-64 bg-white border-r border-gray-200 shadow-sm">
+          <SideBar role={role} setCurrentView={setCurrentView} currentView={currentView} />
         </div>
-        <div className="w-[70%] min-h-screen py-4" id="content">
-          {/* Right  */}
+
+        {/* Content Area */}
+        <div className="flex-1 p-6 bg-gray-50">
           {renderContent()}
         </div>
       </div>
+
+      {/* Footer */}
       <Footer />
     </div>
   );

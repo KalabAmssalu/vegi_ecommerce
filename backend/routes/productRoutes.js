@@ -5,6 +5,8 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  getMyProduct,
+  getMyProductsById,
 } from "../controllers/productController.js"; // Adjust the path as necessary
 import upload from "../config/multerconfig.js";
 import auth from "../middleware/auth.js";
@@ -16,24 +18,21 @@ const router = express.Router();
 router.post(
   "/",
   auth, // First authenticate the user
-  (req, res, next) =>
-    authorize(req.user.role, "products", "WRITE")(req, res, next), // Authorize based on the user's role
+  authorize("products", "WRITE"),
   upload.single("imageUrl"),
   createProduct
 );
 
-router.get("/", auth, authorize("products", "READ"), (req, res) => {
-  res.json({ msg: "Access granted to view products" });
-});
+router.get("/", auth, getAllProducts);
 
-// Route to get all products
-// router.get("/", auth, authorize("products", "READ"), (req, res) => {
-//   try {
-//     getAllProducts(req, res); // Call the controller function
-//   } catch (error) {
-//     res.status(500).json({ msg: "An error occurred while fetching products", error });
-//   }
-// });
+router.get(
+  "/myproducts/:id",
+  auth,
+  authorize("products", "READ"),
+  getMyProductsById
+);
+
+router.get("/myproducts", auth, authorize("products", "READ"), getMyProduct);
 
 // Get all products (Customer, Merchant, Manager, Admin)
 router.get(

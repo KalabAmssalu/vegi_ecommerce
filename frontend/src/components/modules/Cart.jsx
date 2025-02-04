@@ -55,11 +55,11 @@ export default function Cart() {
           <div className="lg:col-span-2">
             {items.map((item) => (
               <div
-                key={item.id}
+                key={item._id}
                 className="flex gap-4 p-4 mb-4 bg-white rounded-lg shadow-sm"
               >
                 <img
-                  src={item.image}
+                  src={`${process.env.REACT_APP_BACKEND_URL}/${item.imageUrl}`}
                   alt={item.name}
                   className="w-24 h-24 object-cover rounded-md"
                 />

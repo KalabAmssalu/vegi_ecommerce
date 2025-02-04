@@ -27,7 +27,7 @@ export const QuickViewModal = ({ product, isOpen, onClose }) => {
             </h2>
             <div className="grid gap-4">
               <img
-                src={product.image}
+                src={`${process.env.REACT_APP_BACKEND_URL}/${product.imageUrl}`}
                 alt={product.name}
                 className="w-full h-48 object-cover rounded-lg"
               />

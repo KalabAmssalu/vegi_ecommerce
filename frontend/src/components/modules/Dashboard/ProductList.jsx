@@ -1,33 +1,12 @@
 import { Eye } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useFetchMyProducts } from "../../../api/product/action";
 
 const ProductListTable = () => {
-    const navigate = useNavigate();
-  // Sample product data
-  const products = [
-    {
-      id: 1,
-      name: "Wireless Bluetooth Earbuds",
-      description: "High-quality wireless earbuds with noise cancellation.",
-      price: "$99.99",
-      quantity: 50,
-    },
-    {
-      id: 2,
-      name: "Smartwatch Pro",
-      description: "Fitness tracking, heart rate monitoring, and more.",
-      price: "$199.99",
-      quantity: 30,
-    },
-    {
-      id: 3,
-      name: "Wireless Charging Pad",
-      description: "Fast wireless charging for all Qi-enabled devices.",
-      price: "$49.99",
-      quantity: 100,
-    },
-  ];
+  const navigate = useNavigate();
+
+  const { data: products } = useFetchMyProducts();
 
   // Handle view details action
   const handleViewDetails = (productId) => {
@@ -42,10 +21,14 @@ const ProductListTable = () => {
         <h2 className="text-2xl font-semibold p-6 bg-gray-800 text-white">
           Product List
         </h2>
+
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Image
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
@@ -64,30 +47,41 @@ const ProductListTable = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-xs">
-                    {product.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.price}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.quantity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button
-                      onClick={() => handleViewDetails(product.id)}
-                      className="text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {products &&
+                products.map((product) => (
+                  <tr
+                    key={product._id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <img
+                        src={`${process.env.REACT_APP_BACKEND_URL}/${product.imageUrl}`}
+                        alt={product.name}
+                        className="w-20 h-20 object-cover rounded-lg"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {product.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-xs">
+                      {product.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {product.price}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {product.quantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <button
+                        onClick={() => handleViewDetails(product._id)}
+                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

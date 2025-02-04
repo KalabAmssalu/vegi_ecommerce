@@ -9,38 +9,18 @@ import Footer from "../../common/Footer/Footer";
 import { ChevronLeft, Minus, Plus, ShoppingCart, Star } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import toast from "react-hot-toast";
+import { useFetchMyProductsById } from "../../../api/product/action";
 
 const ProductDetailMerchant = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Mock product data (replace with your actual data fetching)
-  const [product, setProduct] = useState({
-    id: 1,
-    name: "Organic Broccoli",
-    price: 3.99,
-    description: "Fresh organic broccoli from local farms",
-    category: "Vegetables",
-    image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c",
-    longDescription:
-      "Our premium organic broccoli is sourced directly from certified organic farms. Each head is carefully selected for freshness and quality, ensuring you get the best produce for your healthy lifestyle.",
-    specs: {
-      weight: "1 Kg",
-      origin: "Local Organic Farm",
-      quality: "Premium Grade",
-      certification: "USDA Organic",
-    },
-    quantity: 50, // Added quantity field
-  });
-
+  const { data: product } = useFetchMyProductsById(id);
 
   const [activeTab, setActiveTab] = useState("description");
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState({ ...product });
 
-
- 
   // Handle edit mode toggle
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
@@ -58,7 +38,7 @@ const ProductDetailMerchant = () => {
     }));
   };
 
-  // Handle image change
+  // Handle image change (optional)
   const handleImageChange = (e) => {
     // const file = e.target.files[0];
     // if (file) {
@@ -75,7 +55,6 @@ const ProductDetailMerchant = () => {
 
   // Handle save changes
   const handleSaveChanges = () => {
-    setProduct({ ...editedProduct });
     setIsEditing(false);
     toast.success("Product updated successfully!");
   };
@@ -85,6 +64,10 @@ const ProductDetailMerchant = () => {
     toast.success("Product deleted successfully!");
     navigate("/products"); // Redirect to products page after deletion
   };
+
+  if (!product) {
+    return <div>No product details available</div>; // Or some other fallback UI
+  }
 
   return (
     <>
@@ -110,7 +93,7 @@ const ProductDetailMerchant = () => {
               {isEditing ? (
                 <div className="flex flex-col space-y-4">
                   <img
-                    src={editedProduct.image}
+                    src={`${process.env.REACT_APP_BACKEND_URL}/${editedProduct.imageUrl}`}
                     alt={editedProduct.name}
                     className="w-full h-[400px] object-cover rounded-xl"
                   />
@@ -123,8 +106,8 @@ const ProductDetailMerchant = () => {
                 </div>
               ) : (
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={`${process.env.REACT_APP_BACKEND_URL}/${product?.imageUrl}`}
+                  alt={product?.name}
                   className="w-full h-[500px] object-cover rounded-xl"
                 />
               )}
@@ -137,13 +120,13 @@ const ProductDetailMerchant = () => {
                   <input
                     type="text"
                     name="category"
-                    value={editedProduct.category}
+                    value={editedProduct?.category?.name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 ) : (
                   <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                    {product.category}
+                    {product?.category?.name}
                   </span>
                 )}
 
@@ -151,13 +134,13 @@ const ProductDetailMerchant = () => {
                   <input
                     type="text"
                     name="name"
-                    value={editedProduct.name}
+                    value={editedProduct?.name}
                     onChange={handleInputChange}
                     className="w-full mt-4 text-4xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 ) : (
                   <h1 className="mt-4 text-4xl font-bold text-gray-900">
-                    {product.name}
+                    {product?.name}
                   </h1>
                 )}
 
@@ -174,13 +157,13 @@ const ProductDetailMerchant = () => {
                 {isEditing ? (
                   <textarea
                     name="description"
-                    value={editedProduct.description}
+                    value={editedProduct?.description}
                     onChange={handleInputChange}
                     className="w-full mt-6 p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 ) : (
                   <p className="mt-6 text-gray-600 leading-relaxed">
-                    {product.description}
+                    {product?.description}
                   </p>
                 )}
 
@@ -189,14 +172,14 @@ const ProductDetailMerchant = () => {
                     <input
                       type="text"
                       name="price"
-                      value={editedProduct.price}
+                      value={editedProduct?.price}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   ) : (
                     <>
                       <span className="text-4xl font-bold text-gray-900">
-                        ${product.price}
+                        ${product?.price}
                       </span>
                       <span className="ml-2 text-gray-500">per kg</span>
                     </>
@@ -210,7 +193,7 @@ const ProductDetailMerchant = () => {
                     <input
                       type="number"
                       name="quantity"
-                      value={editedProduct.quantity}
+                      value={editedProduct?.quantity}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
@@ -222,10 +205,7 @@ const ProductDetailMerchant = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-6">
-                    
-                  
-                  </div>
+                  <div className="flex items-center space-x-6"></div>
                 )}
               </div>
             </div>
@@ -260,19 +240,19 @@ const ProductDetailMerchant = () => {
                 isEditing ? (
                   <textarea
                     name="longDescription"
-                    value={editedProduct.longDescription}
+                    value={editedProduct?.longDescription}
                     onChange={handleInputChange}
                     className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 ) : (
                   <p className="text-gray-600 leading-relaxed">
-                    {product.longDescription}
+                    {product?.longDescription}
                   </p>
                 )
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {Object.entries(
-                    isEditing ? editedProduct.specs : product.specs
+                    isEditing ? editedProduct?.specs : product?.specs
                   ).map(([key, value]) => (
                     <div
                       key={key}

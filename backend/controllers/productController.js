@@ -10,8 +10,8 @@ import { console } from "inspector";
 // Create Product Controller
 export const createProduct = async (req, res) => {
   try {
-    const userId = req.user;
-    console.log("usr", userId);
+    const userId = req.user.userId;
+
     // Validate request input
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,10 +19,9 @@ export const createProduct = async (req, res) => {
     }
 
     // Destructure request body
-    const { name, description, price } = req.body;
+    const { name, description, price, quantity, category } = req.body;
 
-    const merchant = await Merchant.findOne({ userId });
-    const category = "66b765b3eaeca0654c528a9c";
+    const merchant = await Merchant.findOne({ user: userId });
 
     // Check if the merchant exists
     const existingMerchant = await Merchant.findById(merchant);
@@ -37,7 +36,7 @@ export const createProduct = async (req, res) => {
     }
 
     // Set the image URL
-    const imageUrl = path.join("uploads", imageFile.filename);
+    const imageUrl = path.posix.join("uploads", imageFile.filename);
 
     // Create a new Product
     const product = new Product({
@@ -46,6 +45,7 @@ export const createProduct = async (req, res) => {
       description,
       category,
       price,
+      quantity,
       imageUrl, // This now stores the single image URL
     });
 
@@ -65,6 +65,26 @@ export const createProduct = async (req, res) => {
 };
 
 // Get all products
+export const getMyProduct = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const merchant = await Merchant.findOne({ user: userId });
+
+    // Check if the merchant exists
+    const existingMerchant = await Merchant.findById(merchant);
+    if (!existingMerchant) {
+      return res.status(404).json({ msg: "Merchant not found" });
+    }
+    const products = await Product.find({ merchant: merchant })
+      .populate("merchant")
+      .populate("category");
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
+// Get all products
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -74,6 +94,34 @@ export const getAllProducts = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Error fetching products" });
+  }
+};
+
+// Get a product by ID
+export const getMyProductsById = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Find the merchant linked to the user
+    const merchant = await Merchant.findOne({ user: userId });
+
+    if (!merchant) {
+      return res.status(404).json({ msg: "Merchant not found" });
+    }
+
+    // Find the specific product by ID, ensuring it belongs to the merchant
+    const product = await Product.findOne({ _id: req.params.id, merchant: merchant._id })
+      .populate("merchant")
+      .populate("category");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(product);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error fetching product" });
   }
 };
 

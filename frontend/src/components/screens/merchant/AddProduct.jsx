@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAddProduct } from "../../../api/product/action";
+import { useFetchCategories } from "../../../api/category/action";
 
 const AddProduct = () => {
   const [formData, setFormData] = useState({
@@ -7,10 +8,13 @@ const AddProduct = () => {
     description: "",
     category: "",
     price: "",
+    quantity: "",
     imageUrl: null,
   });
 
   const { mutate, isLoading, isError, isSuccess, error } = useAddProduct();
+
+  const { data } = useFetchCategories();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,11 +33,11 @@ const AddProduct = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("category", formData.category);
+    formDataToSend.append("quantity", formData.quantity);
     formDataToSend.append("price", formData.price);
     formDataToSend.append("imageUrl", formData.imageUrl);
 
@@ -74,9 +78,11 @@ const AddProduct = () => {
                 className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Select Category</option>
-                <option value="Vegetables">Vegetables</option>
-                <option value="Fruits">Fruits</option>
-                <option value="Spices">Spices</option>
+                {data?.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -106,6 +112,22 @@ const AddProduct = () => {
               className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Product Price"
             />
+          </div>
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700">
+                Quantity
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Product Quantity"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">

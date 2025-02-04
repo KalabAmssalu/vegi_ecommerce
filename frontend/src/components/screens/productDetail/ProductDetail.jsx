@@ -2,51 +2,40 @@ import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { products } from "../../../constant/product";
 import { addToCart } from "../../../slices/cartSlice";
 import Back from "../../common/Back";
 import Header from "../../common/Header/Header";
-import { shop_feature, vegetables } from "../../../constant/Data";
 import { ChevronLeft, Minus, Plus, ShoppingCart, Star } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import toast from "react-hot-toast";
 import Footer from "../../common/Footer/Footer";
+import { useFetchMyProductsById } from "../../../api/product/action";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { data: product } = useFetchMyProductsById(id);
   const dispatch = useDispatch();
-  // const product = products.find((p) => p.id === Number(id));
-
-  // if (!product) {
-  //   return (
-  //     <div className="text-center text-xl font-semibold mt-10">
-  //       Product not found
-  //     </div>
-  //   );
-  // }
-
-  // console.log(product);
 
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
 
   // Mock product data (replace with your actual data fetching)
-  const product = {
-    id: 1,
-    name: "Organic Broccoli",
-    price: 3.99,
-    description: "Fresh organic broccoli from local farms",
-    category: "Vegetables",
-    image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c",
-    longDescription:
-      "Our premium organic broccoli is sourced directly from certified organic farms. Each head is carefully selected for freshness and quality, ensuring you get the best produce for your healthy lifestyle.",
-    specs: {
-      weight: "1 Kg",
-      origin: "Local Organic Farm",
-      quality: "Premium Grade",
-      certification: "USDA Organic",
-    },
-  };
+  // const product = {
+  //   id: 1,
+  //   name: "Organic Broccoli",
+  //   price: 3.99,
+  //   description: "Fresh organic broccoli from local farms",
+  //   category: "Vegetables",
+  //   image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c",
+  //   longDescription:
+  //     "Our premium organic broccoli is sourced directly from certified organic farms. Each head is carefully selected for freshness and quality, ensuring you get the best produce for your healthy lifestyle.",
+  //   specs: {
+  //     weight: "1 Kg",
+  //     origin: "Local Organic Farm",
+  //     quality: "Premium Grade",
+  //     certification: "USDA Organic",
+  //   },
+  // };
 
   const handleQuantityChange = (type) => {
     if (type === "decrease" && quantity > 1) {
@@ -83,8 +72,8 @@ const ProductDetail = () => {
             {/* Product Image */}
             <div className="relative overflow-hidden rounded-xl">
               <img
-                src={product.image}
-                alt={product.name}
+                src={`${process.env.REACT_APP_BACKEND_URL}/${product?.imageUrl}`}
+                alt={product?.name}
                 className="w-full h-[500px] object-cover product-image"
               />
             </div>
@@ -93,10 +82,10 @@ const ProductDetail = () => {
             <div className="flex flex-col justify-between">
               <div>
                 <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                  {product.category}
+                  {product?.category?.name}
                 </span>
                 <h1 className="mt-4 text-4xl font-bold text-gray-900">
-                  {product.name}
+                  {product?.name}
                 </h1>
                 <div className="mt-4 flex items-center space-x-2">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -108,11 +97,11 @@ const ProductDetail = () => {
                   <span className="text-sm text-gray-500">(128 reviews)</span>
                 </div>
                 <p className="mt-6 text-gray-600 leading-relaxed">
-                  {product.description}
+                  {product?.description}
                 </p>
                 <div className="mt-8">
                   <span className="text-4xl font-bold text-gray-900">
-                    ${product.price}
+                    ${product?.price}
                   </span>
                   <span className="ml-2 text-gray-500">per kg</span>
                 </div>
@@ -179,11 +168,11 @@ const ProductDetail = () => {
             <div className="mt-8">
               {activeTab === "description" ? (
                 <p className="text-gray-600 leading-relaxed">
-                  {product.longDescription}
+                  {product?.longDescription}
                 </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {Object.entries(product.specs).map(([key, value]) => (
+                  {Object.entries(product?.specs).map(([key, value]) => (
                     <div
                       key={key}
                       className="flex justify-between py-3 border-b border-gray-100"

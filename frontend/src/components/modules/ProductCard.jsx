@@ -10,7 +10,7 @@ export const ProductCard = ({ product, onQuickView }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const wishlistItems = useSelector((state) => state.wishlist.items);
-  const isInWishlist = wishlistItems.some((item) => item.id === product.id);
+  const isInWishlist = wishlistItems.some((item) => item.id === product._id);
   const isAuthenticated = useSelector((state) => state.user.token);
   const isAuth = isAuthenticated;
 
@@ -25,7 +25,7 @@ export const ProductCard = ({ product, onQuickView }) => {
   };
 
   const handleDetailview = () => {
-   navigate("/product/" + product.id);
+    navigate("/product/" + product._id);
   };
 
   return (
@@ -33,7 +33,7 @@ export const ProductCard = ({ product, onQuickView }) => {
       {/* Product Image */}
       <div className="relative">
         <img
-          src={product.image}
+          src={`${process.env.REACT_APP_BACKEND_URL}/${product.imageUrl}`}
           alt={product.name}
           className="w-full h-56 object-cover"
         />
@@ -68,7 +68,7 @@ export const ProductCard = ({ product, onQuickView }) => {
             ${product.price}
           </span>
           <div className="flex items-center text-yellow-500 text-sm">
-            ★ <span className="ml-1">{product.rating}</span>
+            ★ <span className="ml-1">{product?.rating}</span>
           </div>
         </div>
       </div>

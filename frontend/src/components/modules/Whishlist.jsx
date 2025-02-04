@@ -60,12 +60,12 @@ export default function Wishlist() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {wishlistItems.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className="group bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
             >
               <div className="relative aspect-square overflow-hidden rounded-t-lg">
                 <img
-                  src={item.image}
+                  src={`${process.env.REACT_APP_BACKEND_URL}/${item.imageUrl}`}
                   alt={item.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />

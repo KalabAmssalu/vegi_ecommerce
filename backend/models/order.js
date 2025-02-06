@@ -37,7 +37,7 @@ const orderSchema = new Schema(
     deliveryPerson: {
       type: Schema.Types.ObjectId,
       ref: "User", // Assuming delivery person is a user with a specific "delivery" role
-      required: true,
+      required: false,
     },
     delivery_address: {
       street: {
@@ -60,6 +60,10 @@ const orderSchema = new Schema(
         type: String,
         required: false,
       },
+      email: {
+        type: String,
+        required: true,
+      }
     },
     orderDate: {
       type: Date,

@@ -13,7 +13,7 @@ const FloatChat = () => {
   return (
     <div>
       <div
-        className="fixed bottom-5 right-5 bg-primary text-white p-4 rounded-full shadow-lg cursor-pointer"
+        className="fixed bottom-5 z-50 right-5 bg-primary text-white p-4 rounded-full shadow-lg cursor-pointer"
         onClick={toggleChat}
       >
         <BsChatText size={24} />

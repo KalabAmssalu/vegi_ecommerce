@@ -46,6 +46,20 @@ module.exports = {
         md: `calc(var(--radius) - 2px)`,
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        checkAnim: {
+          "0%": { strokeDashoffset: 60 },
+          "100%": { strokeDashoffset: 0 },
+        },
+        circleAnim: {
+          "0%": { strokeDashoffset: 166 },
+          "100%": { strokeDashoffset: 0 },
+        },
+      },
+      animation: {
+        checkmark: "checkAnim 0.5s ease-in-out forwards",
+        circle: "circleAnim 0.6s ease-out forwards",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

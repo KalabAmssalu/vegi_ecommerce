@@ -10,10 +10,9 @@ export default function ProductList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filters, setFilters] = useState({
-    priceRange: [0, 1000],
+    priceRange: [0, 4000],
     categories: [],
-    brands: [],
-    minRating: 0,
+    location: "",
   });
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const { data: products = [] } = useFetchAllProducts(); // Default to an empty array if no data is fetched
@@ -31,8 +30,12 @@ export default function ProductList() {
         const matchesCategory =
           filters.categories.length === 0 ||
           filters.categories.includes(product.category.name);
+        const matchesLocation =
+          !filters.location || product.merchant.address === filters.location;
 
-        return matchesSearch && matchesPrice && matchesCategory;
+        return (
+          matchesSearch && matchesPrice && matchesCategory && matchesLocation
+        );
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -101,7 +104,7 @@ export default function ProductList() {
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
                   <ProductCard
-                    key={product.id}
+                    key={product._id}
                     product={product}
                     onQuickView={setQuickViewProduct}
                   />
@@ -125,4 +128,3 @@ export default function ProductList() {
     </div>
   );
 }
-

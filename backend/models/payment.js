@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const paymentSchema = new Schema(
   {
-    order: {
+    order: { 
       type: Schema.Types.ObjectId,
       ref: "Order",
       required: true,
@@ -19,7 +19,7 @@ const paymentSchema = new Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "debit_card", "paypal", "cash_on_delivery"],
+      enum: ["chapa", "cash", "bank_transfer"],
       required: true,
     },
     paymentStatus: {
@@ -28,22 +28,19 @@ const paymentSchema = new Schema(
       default: "pending",
       required: true,
     },
-    transactionId: {
+    tx_ref: {
       type: String,
-      required: function () {
-        return this.paymentMethod !== "cash_on_delivery";
-      },
+      required: true,
+      unique: true,
     },
     paymentDate: {
       type: Date,
-      default: Date.now,
+      required: false,
     },
-    assignedOrder: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Order",
-      },
-    ],
+    currency: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -51,5 +48,4 @@ const paymentSchema = new Schema(
 );
 
 const Payment = mongoose.model("Payment", paymentSchema);
-
 export default Payment;

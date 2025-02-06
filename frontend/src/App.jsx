@@ -13,6 +13,8 @@ import ProductListTable from "./components/modules/Dashboard/ProductList";
 import ProductDetailMerchant from "./components/modules/Dashboard/ProductDetailMerchant";
 import CustomerOrderList from "./components/modules/CustomerOrderList";
 import OrderDetail from "./components/modules/Dashboard/OrderDetail";
+import Checkout from "./components/modules/Checkout";
+import PaymentSuccess from "./components/common/PaymentSuccess";
 
 // Lazy-loaded components
 const Landing = lazy(() => import("./components/screens/landingPage/Landing"));
@@ -92,6 +94,7 @@ const App = () => (
         <Route path="/Chat" element={<ChatPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/Subscription" element={<SubscriptionPage />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route
           path="/dashboard"
           element={
@@ -113,6 +116,14 @@ const App = () => (
           element={
             <PrivateRoute>
               <OrderDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <PrivateRoute>
+              <Checkout />
             </PrivateRoute>
           }
         />

@@ -1,4 +1,4 @@
-import { Eye, Heart, ListCollapse, Search, ShoppingCart } from "lucide-react";
+import { Eye, Heart, ListCollapse,  ShoppingCart } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../slices/cartSlice";
@@ -15,7 +15,9 @@ export const ProductCard = ({ product, onQuickView }) => {
   const isAuth = isAuthenticated;
 
   const handleAddToCart = () => {
-    dispatch(addToCart(product));
+    const { _id, name, price, imageUrl } = product;
+    const cartItem = { id: _id, name, price, imageUrl };
+    dispatch(addToCart(cartItem));
     toast.success("Added to cart");
   };
 
@@ -29,7 +31,7 @@ export const ProductCard = ({ product, onQuickView }) => {
   };
 
   return (
-    <div className="relative bg-white border rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+    <div className="relative z-0 bg-white border rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
       {/* Product Image */}
       <div className="relative">
         <img
@@ -65,7 +67,7 @@ export const ProductCard = ({ product, onQuickView }) => {
         <h3 className="text-lg font-semibold truncate">{product.name}</h3>
         <div className="flex justify-between items-center mt-2">
           <span className="text-primary font-bold text-xl">
-            ${product.price}
+            ETB {product.price}
           </span>
           <div className="flex items-center text-yellow-500 text-sm">
             ★ <span className="ml-1">{product?.rating}</span>

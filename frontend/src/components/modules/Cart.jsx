@@ -5,17 +5,25 @@ import { formatCurrency } from "../../lib/utils";
 import Header from "../common/Header/Header";
 import Back from "../common/Back";
 import Footer from "../common/Footer/Footer";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Cart() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { items, total } = useSelector((state) => state.cart);
+  const user = useSelector((state) => state.user);
 
   const handleUpdateQuantity = (id, quantity) => {
+    console.log("Updating quantity for item:", id, "New quantity:", quantity); // Debugging
     dispatch(updateQuantity({ id, quantity }));
   };
 
+  const handleCheckout = () => {
+    navigate("/checkout");
+  };
+
   const handleRemove = (id) => {
+    console.log("Removing item:", id); // Debugging
     dispatch(removeFromCart(id));
   };
 
@@ -24,7 +32,7 @@ export default function Cart() {
       <>
         <Header />
         <Back title="Cart" />
-        <div className="container mx-auto px-4 ">
+        <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto px-4 py-8">
             <Link
               to="/product"
@@ -55,7 +63,7 @@ export default function Cart() {
           <div className="lg:col-span-2">
             {items.map((item) => (
               <div
-                key={item._id}
+                key={item.id}
                 className="flex gap-4 p-4 mb-4 bg-white rounded-lg shadow-sm"
               >
                 <img
@@ -72,29 +80,26 @@ export default function Cart() {
 
                   <div className="flex items-center gap-2 mt-4">
                     <button
-                      variant="outline"
-                      size="icon"
                       onClick={() =>
                         handleUpdateQuantity(item.id, item.quantity - 1)
                       }
+                      disabled={item.quantity <= 1}
+                      className="p-1 border rounded-md hover:bg-gray-100"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
                     <span className="w-8 text-center">{item.quantity}</span>
                     <button
-                      variant="outline"
-                      size="icon"
                       onClick={() =>
                         handleUpdateQuantity(item.id, item.quantity + 1)
                       }
+                      className="p-1 border rounded-md hover:bg-gray-100"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                     <button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-auto text-red-500 hover:text-red-600"
                       onClick={() => handleRemove(item.id)}
+                      className="ml-auto text-red-500 hover:text-red-600"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -111,7 +116,14 @@ export default function Cart() {
                 <span>Subtotal</span>
                 <span>{formatCurrency(total)}</span>
               </div>
-              <button className="w-full">Proceed to Checkout</button>
+              {user.role === "customer" && (
+                <button
+                  className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition-colors"
+                  onClick={handleCheckout}
+                >
+                  Proceed to Checkout
+                </button>
+              )}
             </div>
           </div>
         </div>

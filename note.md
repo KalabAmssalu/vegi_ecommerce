@@ -3,14 +3,14 @@
 - [x] AUTHORIZATION AND AUTHENTICATION MIDDLEWARE SETUP CORRECTION
 - [x] ADMIN MODEL TEST
 - [x] ADMIN LOGIN TEST
-- [] FILE UPLOADER TEST WITH A FORM DATA
+- [x] FILE UPLOADER TEST WITH A FORM DATA
 - [x] MODEL RELATION TESTING
-- [] ROLE BASED LOGIN SYSTEM WITH FRONTEND AND BACKEND
+- [x] ROLE BASED LOGIN SYSTEM WITH FRONTEND AND BACKEND
 
 Major Functionality
-Cart system
+-[x] Cart system
 Chat
-Filtering price
+-[x] Filtering price
 delivery assign
 payment integration chapa
 product review

@@ -19,7 +19,7 @@ root.render(
           {" "}
           {/* Wrap with PersistGate */}
           <Router>
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster position="top-center" reverseOrder={false} />
             <App /> {/* Centralized component for routing and layout */}
           </Router>
         </PersistGate>

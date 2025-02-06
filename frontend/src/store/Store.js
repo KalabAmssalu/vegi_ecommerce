@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage"; // Uses localStorage for persis
 import userSlice from "../slices/UserSlice";
 import wishlistReducer from "../slices/whishlistSlice";
 import cartReducer from "../slices/cartSlice";
+import successReducer from "../slices/successSlice";
 import { combineReducers } from "redux";
 
 // Combine reducers
@@ -11,13 +12,14 @@ const rootReducer = combineReducers({
   user: userSlice,
   cart: cartReducer,
   wishlist: wishlistReducer,
+  success: successReducer,
 });
 
 // Configure persistence
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["cart", "wishlist", "user"], // Only persist these slices
+  whitelist: ["cart", "wishlist", "user", "success"], // Only persist these slices
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

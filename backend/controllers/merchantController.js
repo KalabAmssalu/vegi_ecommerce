@@ -51,6 +51,7 @@ export const createMerchant = async (req, res) => {
     // Create a new Merchant
     const merchant = new Merchant({
       trade_permit: tradePermitPath,
+      address: address,
       user: user._id,
     });
 

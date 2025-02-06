@@ -16,7 +16,7 @@ const router = express.Router();
 router.post(
   "/",
   auth, // Authenticate the user
-  authorizeMultipleRoles(["Customer"], "payments", "WRITE"), // Only Customers can create payments
+  authorize("payments", "WRITE"),
   createPayment
 );
 

@@ -20,7 +20,7 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="fixed bottom-20 right-5 w-full max-w-sm p-4 bg-white rounded-lg shadow-lg">
+    <div className="fixed bottom-20 z-50 right-5 w-full max-w-sm p-4 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
         Customer Support Chat
       </h2>

@@ -12,6 +12,9 @@ const merchantSchema = new Schema(
       ref: "User",
       required: true,
     },
+    address: {
+      type: String,
+    },
     isVerified: {
       type: Boolean,
       default: false,

@@ -46,6 +46,16 @@ const Header = () => {
                 </a>
               </li>
             ))}
+            {userInfo.role !== "customer" && (
+              <li>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 hover:text-red-700"
+                >
+                  Dashboard
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </div>
@@ -64,14 +74,16 @@ const Header = () => {
                     </span>
                   )}
                 </Link>
-                <Link to="/cart" className="relative">
-                  <ShoppingCart className="h-6 w-6 hover:text-blue-600" />
-                  {itemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {itemCount}
-                    </span>
-                  )}
-                </Link>
+                {userInfo.role === "customer" && (
+                  <Link to="/cart" className="relative">
+                    <ShoppingCart className="h-6 w-6 hover:text-blue-600" />
+                    {itemCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
                 {/* Profile Dropdown */}
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -109,14 +121,25 @@ const Header = () => {
                           My Profile
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          to="/myorders"
-                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        >
-                          My Orders
-                        </Link>
-                      </li>
+                      {userInfo.role === "customer" ? (
+                        <li>
+                          <Link
+                            to="/myorders"
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            My Orders
+                          </Link>
+                        </li>
+                      ) : (
+                        <li>
+                          <Link
+                            to="/dashboard"
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Dashboard
+                          </Link>
+                        </li>
+                      )}
                       <li>
                         <Link
                           to="/UserSettings"

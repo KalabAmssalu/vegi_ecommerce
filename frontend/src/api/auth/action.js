@@ -23,10 +23,11 @@ export const useLogin = () => {
         return response.data;
       } catch (error) {
         toast.error(
-          `Error during login API call: ${
-            error.response?.data?.msg || error.message
-          }`
+          `Error during login : ${error.response?.data?.msg || error.message}`
         );
+
+        const errorMessage = error.response?.data?.message || error.message;
+        toast.error(`Error during login: ${errorMessage}`);
         throw error;
       }
     },
@@ -56,14 +57,13 @@ export const useRegister = () => {
   });
 };
 
-
 export const useMerchantRegister = () => {
   return useMutation({
     mutationKey: ["MerchantSignUp"],
     mutationFn: async (userData) => {
       try {
         console.log("Merchant SignUp Data:", userData);
-        
+
         const response = await axiosInstance.post("/merchants", userData, {
           headers: {
             "Content-Type": "multipart/form-data", // Ensure form-data format
@@ -85,7 +85,6 @@ export const useMerchantRegister = () => {
     },
   });
 };
-
 
 // Get User Query
 export const useGetUser = () => {

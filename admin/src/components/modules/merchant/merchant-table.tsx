@@ -36,31 +36,12 @@ import {
 } from "@/components/ui/table";
 import { Merchant } from "@/types/merchant/merchant";
 import { MerchantDetailModal } from "./merchant-detail-modal";
+import {
+  useFetchAllMerchants,
+  useToggleVerified,
+} from "@/action/Query/merchant-Query/merchant";
 
-// Sample data for preview
-const sampleData: Merchant[] = [
-  {
-    _id: "1",
-    trade_permit: "TP123456",
-    user: {
-      id: "1",
-      role: "admin",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      phoneNumber: "1234567890",
-      address: "123 Main St",
-    },
-    address: "456 Market St",
-    isVerified: true,
-    isBlocked: false,
-    products: [],
-    orders: [],
-  },
-  // Add more sample data as needed
-];
-
-export function MerchantTable() {
+export function MerchantTable({ merchantData }: { merchantData: Merchant[] }) {
   const [sorting, setSorting] = useState<SortingState>([]); // SortingState is typically an array of ColumnSort objects
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // ColumnFiltersState is typically an array of ColumnFilter objects
 
@@ -69,6 +50,11 @@ export function MerchantTable() {
     null
   );
   const [rowSelection, setRowSelection] = useState({});
+
+  const { mutate: toggleVerified } = useToggleVerified();
+  const handleApprove = async (id: string) => {
+    toggleVerified({ id });
+  };
   const columns: ColumnDef<Merchant>[] = [
     {
       id: "select",
@@ -90,19 +76,19 @@ export function MerchantTable() {
       enableHiding: false,
     },
     {
-      accessorKey: "user.firstName",
+      accessorKey: "firstName",
       header: "First Name",
-      cell: ({ row }) => <div>{row.getValue("user.firstName")}</div>,
+      cell: ({ row }) => row.original.user?.firstName ?? "Unknown",
     },
     {
-      accessorKey: "user.lastName",
+      accessorKey: "lastName",
       header: "Last Name",
-      cell: ({ row }) => <div>{row.getValue("user.lastName")}</div>,
+      cell: ({ row }) => row.original.user?.lastName ?? "Unknown",
     },
     {
-      accessorKey: "user.email",
+      accessorKey: "email",
       header: "Email",
-      cell: ({ row }) => <div>{row.getValue("user.email")}</div>,
+      cell: ({ row }) => row.original.user?.email ?? "Unknown",
     },
     {
       accessorKey: "address",
@@ -140,7 +126,9 @@ export function MerchantTable() {
                 View details
               </DropdownMenuItem>
 
-              <DropdownMenuItem>Block merchant</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleApprove(merchant._id)}>
+                {merchant.isBlocked ? "Unblock" : "Block"} merchant
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -149,7 +137,7 @@ export function MerchantTable() {
   ];
 
   const table = useReactTable({
-    data: sampleData,
+    data: merchantData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -172,11 +160,9 @@ export function MerchantTable() {
       <div className="flex items-center justify-between">
         <Input
           placeholder="Filter emails..."
-          value={
-            (table.getColumn("user.email")?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("user.email")?.setFilterValue(event.target.value)
+            table.getColumn("email")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

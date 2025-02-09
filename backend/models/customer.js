@@ -24,6 +24,8 @@ const customerSchema = new Schema(
   }
 );
 
-const Customer = mongoose.model("Customer", customerSchema);
+// Prevent duplicate model compilation
+const Customer =
+  mongoose.models.Customer || mongoose.model("Customer", customerSchema);
 
 export default Customer;

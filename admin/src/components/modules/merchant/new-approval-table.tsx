@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,71 +18,76 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Merchant } from "@/types/merchant/merchant";
+import { useToggleVerified } from "@/action/Query/merchant-Query/merchant";
 
-// Sample data for preview
-const sampleData: Merchant[] = [
-  {
-    _id: "2",
-    trade_permit: "TP789012",
-    user: {
-      id: "2",
-      role: "manager",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane@example.com",
-      phoneNumber: "9876543210",
-      address: "789 Oak St",
+export function NewApprovalTable({
+  merchantData,
+}: {
+  merchantData: Merchant[];
+}) {
+  const { mutate: toggleVerified } = useToggleVerified();
+  const handleApprove = async (id: string) => {
+   
+    toggleVerified({ id });
+  };
+
+  const handleDownload = (filePath: string) => {
+    const fileUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${filePath}`; // Ensure the correct API base URL
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.setAttribute("download", filePath.split("\\").pop() || "trade_permit");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const columns: ColumnDef<Merchant>[] = [
+    {
+      accessorKey: "user.firstName",
+      header: "First Name",
     },
-    address: "101 Business Ave",
-    isVerified: false,
-    isBlocked: false,
-    products: [],
-    orders: [],
-  },
-  // Add more sample data as needed
-];
-
-const columns: ColumnDef<Merchant>[] = [
-  {
-    accessorKey: "user.firstName",
-    header: "First Name",
-  },
-  {
-    accessorKey: "user.lastName",
-    header: "Last Name",
-  },
-  {
-    accessorKey: "user.email",
-    header: "Email",
-  },
-  {
-    accessorKey: "address",
-    header: "Address",
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <Button
-        onClick={() => handleApprove(row.original._id)}
-        variant="outline"
-        size="sm"
-      >
-        Approve
-      </Button>
-    ),
-  },
-];
-
-const handleApprove = async (id: string) => {
-  // Implement approval logic here
-  console.log(`Approving merchant with id: ${id}`);
-};
-
-export function NewApprovalTable() {
-  const [data, setData] = useState<Merchant[]>(sampleData);
+    {
+      accessorKey: "user.lastName",
+      header: "Last Name",
+    },
+    {
+      accessorKey: "user.email",
+      header: "Email",
+    },
+    {
+      accessorKey: "address",
+      header: "Address",
+    },
+    {
+      accessorKey: "trade_permit",
+      header: "Trade Permit",
+      cell: ({ row }) => (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleDownload(row.original.trade_permit)}
+        >
+          Download
+        </Button>
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <Button
+          onClick={() => handleApprove(row.original._id)}
+          variant="outline"
+          size="sm"
+          className="bg-primary"
+        >
+          Approve
+        </Button>
+      ),
+    },
+  ];
 
   const table = useReactTable({
-    data,
+    data: merchantData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

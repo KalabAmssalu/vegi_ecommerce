@@ -9,6 +9,7 @@ import {
 import auth from "../middleware/auth.js";
 import authorize from "../middleware/authorization.js";
 import authorizeMultipleRoles from "../middleware/multiAutorize.js";
+import checkUserStatus from "../middleware/userStatus.js";
 
 const router = express.Router();
 

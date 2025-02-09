@@ -1,10 +1,9 @@
-import Customer from "../models/customer.js";
-
 // Create a new customer
 import User from "../models/user.js";
 
 import bcrypt from "bcryptjs"; // For hashing passwords
 import { validationResult } from "express-validator"; // For input validation
+import Customer from "../models/Customer.js";
 
 // Register Controller
 export const createCustomer = async (req, res) => {

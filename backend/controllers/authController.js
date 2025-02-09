@@ -2,6 +2,9 @@ import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import User from "../models/user.js";
 import generateToken from "../utils/generateToken.js";
+import Merchant from "../models/Merchant.js";
+import Customer from "../models/Customer.js";
+import DeliveryPerson from "../models/deliveryPerson.js";
 
 // Login user
 
@@ -18,11 +21,42 @@ export const loginUser = async (req, res) => {
 
   try {
     // Check if user exists
-    let user = await User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         msg: "Invalid credentials. No user found with the provided email.",
       });
+    }
+
+    let userStatus;
+
+    // Role-based status checks
+    if (role === "merchant") {
+      userStatus = await Merchant.findOne({ user: user._id });
+      if (!userStatus) {
+        return res.status(404).json({ message: "Merchant not found" });
+      }
+      if (!userStatus.isVerified) {
+        return res.status(403).json({ message: "Merchant is not verified" });
+      }
+    } else if (role === "customer") {
+      userStatus = await Customer.findOne({ user: user._id });
+      if (!userStatus) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      if (userStatus.isBlocked) {
+        return res.status(403).json({ message: "Customer account is blocked" });
+      }
+    } else if (role === "delivery") {
+      userStatus = await DeliveryPerson.findOne({ user: user._id });
+      if (!userStatus) {
+        return res.status(404).json({ message: "Delivery user not found" });
+      }
+      if (userStatus.isBlocked) {
+        return res.status(403).json({ message: "Delivery account is blocked" });
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid user role" });
     }
 
     // Compare provided password with the stored hashed password
@@ -33,7 +67,7 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // Check user role
+    // Check if the user's role matches the provided role
     if (user.role !== role) {
       return res.status(403).json({
         msg: "Access denied. Your role does not have permission to log in.",

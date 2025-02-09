@@ -1,9 +1,8 @@
-import Merchant from "../models/merchant.js";
 import User from "../models/user.js";
 import bcrypt from "bcryptjs"; // For hashing passwords
-import { validationResult } from "express-validator"; // For input validation
 import path from "path"; // For handling file paths
 import Order from "../models/order.js";
+import Merchant from "../models/Merchant.js";
 
 // Register a new Merchant
 export const createMerchant = async (req, res) => {
@@ -79,6 +78,27 @@ export const getAllMerchants = async (req, res) => {
   }
 };
 
+export const toggleVerified = async (req, res) => {
+  try {
+    const merchant = await Merchant.findById(req.params.id);
+    if (!merchant) {
+      return res.status(404).json({ message: "Merchant not found" });
+    }
+
+    // Toggle the isVerified status
+    merchant.isVerified = !merchant.isVerified;
+    await merchant.save();
+
+    res.status(200).json({
+      message: `Merchant verification status updated to ${merchant.isVerified}`,
+      isVerified: merchant.isVerified,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error toggling merchant verification" });
+  }
+};
+
 export const getMyOrders = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -90,7 +110,9 @@ export const getMyOrders = async (req, res) => {
     }
 
     // Fetch all orders that contain at least one product sold by the merchant
-    const orders = await Order.find({ "products.product": { $in: merchant.products } })
+    const orders = await Order.find({
+      "products.product": { $in: merchant.products },
+    })
       .populate("customer") // Populate customer details
       .populate("products.product") // Populate product details
       .populate("deliveryPerson"); // Populate delivery person details
@@ -100,24 +122,31 @@ export const getMyOrders = async (req, res) => {
     }
 
     // Filter the products inside each order to include only the merchant's products
-    const filteredOrders = orders.map((order) => {
-      const filteredProducts = order.products.filter((item) =>
-        merchant.products.some((merchantProductId) => merchantProductId.equals(item.product._id))
-      );
+    const filteredOrders = orders
+      .map((order) => {
+        const filteredProducts = order.products.filter((item) =>
+          merchant.products.some((merchantProductId) =>
+            merchantProductId.equals(item.product._id)
+          )
+        );
 
-      return {
-        _id: order._id,
-        customer: order.customer,
-        products: filteredProducts,
-        totalAmount: filteredProducts.reduce((acc, item) => acc + item.price * item.quantity, 0), // Calculate total for this merchant
-        status: order.status,
-        deliveryPerson: order.deliveryPerson,
-        delivery_address: order.delivery_address,
-        orderDate: order.orderDate,
-        payment_status: order.payment_status,
-        deliveryDate: order.deliveryDate,
-      };
-    }).filter(order => order.products.length > 0); // Remove orders with no relevant products
+        return {
+          _id: order._id,
+          customer: order.customer,
+          products: filteredProducts,
+          totalAmount: filteredProducts.reduce(
+            (acc, item) => acc + item.price * item.quantity,
+            0
+          ), // Calculate total for this merchant
+          status: order.status,
+          deliveryPerson: order.deliveryPerson,
+          delivery_address: order.delivery_address,
+          orderDate: order.orderDate,
+          payment_status: order.payment_status,
+          deliveryDate: order.deliveryDate,
+        };
+      })
+      .filter((order) => order.products.length > 0); // Remove orders with no relevant products
 
     return res.status(200).json(filteredOrders);
   } catch (error) {
@@ -130,7 +159,6 @@ export const getMyOrders = async (req, res) => {
     return res.status(500).json({ msg: "Server Error" });
   }
 };
-
 
 // Get a merchant by ID
 export const getMerchantById = async (req, res) => {

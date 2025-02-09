@@ -3,20 +3,20 @@ import User from "../models/user.js";
 import bcrypt from "bcryptjs"; // For hashing passwords
 import { validationResult } from "express-validator"; // For input validation
 import path from "path"; // For handling file paths
+import Order from "../models/order.js";
 
 // Register a new Merchant
 export const createMerchant = async (req, res) => {
   try {
     // Validate request input
     console.log("Merchant SignUp", req.body);
- 
 
     // Handle file upload
     const trade_permit = req.file;
     if (!trade_permit) {
       return res.status(400).json({ msg: "Trade permit file is required" });
     }
-//111
+    //111
     // Set the image URL
     const tradePermitPath = path.join("uploads", trade_permit.filename);
 
@@ -78,6 +78,59 @@ export const getAllMerchants = async (req, res) => {
     res.status(500).json({ message: "Error fetching merchants" });
   }
 };
+
+export const getMyOrders = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Find the merchant by the user ID
+    const merchant = await Merchant.findOne({ user: userId });
+    if (!merchant) {
+      return res.status(404).json({ msg: "Merchant not found" });
+    }
+
+    // Fetch all orders that contain at least one product sold by the merchant
+    const orders = await Order.find({ "products.product": { $in: merchant.products } })
+      .populate("customer") // Populate customer details
+      .populate("products.product") // Populate product details
+      .populate("deliveryPerson"); // Populate delivery person details
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+
+    // Filter the products inside each order to include only the merchant's products
+    const filteredOrders = orders.map((order) => {
+      const filteredProducts = order.products.filter((item) =>
+        merchant.products.some((merchantProductId) => merchantProductId.equals(item.product._id))
+      );
+
+      return {
+        _id: order._id,
+        customer: order.customer,
+        products: filteredProducts,
+        totalAmount: filteredProducts.reduce((acc, item) => acc + item.price * item.quantity, 0), // Calculate total for this merchant
+        status: order.status,
+        deliveryPerson: order.deliveryPerson,
+        delivery_address: order.delivery_address,
+        orderDate: order.orderDate,
+        payment_status: order.payment_status,
+        deliveryDate: order.deliveryDate,
+      };
+    }).filter(order => order.products.length > 0); // Remove orders with no relevant products
+
+    return res.status(200).json(filteredOrders);
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.name === "CastError") {
+      return res.status(400).json({ msg: "Invalid order or merchant ID" });
+    }
+
+    return res.status(500).json({ msg: "Server Error" });
+  }
+};
+
 
 // Get a merchant by ID
 export const getMerchantById = async (req, res) => {

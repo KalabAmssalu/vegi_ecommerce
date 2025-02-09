@@ -5,6 +5,7 @@ import {
   getPaymentById,
   updatePayment,
   deletePayment,
+  verifyPayment,
 } from "../controllers/paymentController.js"; // Adjust the path as necessary
 import auth from "../middleware/auth.js";
 import authorize from "../middleware/authorization.js";
@@ -19,6 +20,8 @@ router.post(
   authorize("payments", "WRITE"),
   createPayment
 );
+
+router.post("/verify/:id", auth, authorize("payments", "WRITE"), verifyPayment); // Verify a payment by ID
 
 // Get all payments (Admin and Manager only)
 router.get(

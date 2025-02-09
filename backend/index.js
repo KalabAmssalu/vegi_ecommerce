@@ -54,6 +54,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import managerRoutes from "./routes/managerRoutes.js";
+import statusRoutes from "./routes/statusRoutes.js";
 
 app.use("/api/adminusers", adminUserRoutes);
 app.use("/api/managers", managerRoutes);
@@ -73,6 +74,7 @@ app.use("/api/customers", customerRoutes);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/stat", statusRoutes);
 
 const PORT = process.env.PORT || 5000;
 

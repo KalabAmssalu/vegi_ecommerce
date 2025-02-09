@@ -29,6 +29,13 @@ const merchantSchema = new Schema(
         ref: "Product",
       },
     ],
+    orders: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Order",
+        required: false,
+      },
+    ],
   },
   {
     timestamps: true,

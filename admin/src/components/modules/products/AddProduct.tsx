@@ -13,7 +13,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import {
@@ -24,21 +23,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import React from "react";
+import React, { useEffect } from "react";
+import {
+  useFetchCategories,
+  useFetchProductById,
+  useSetProduct,
+  useUpdateProduct,
+} from "@/action/Query/product-Query/product";
 
 // Define the form schema using zod
 const formSchema = z.object({
   name: z.string().min(1, "Product Name is required"),
   description: z.string().min(1, "Description is required"),
   category: z.string().min(1, "Category is required"),
-  price: z.string().min(1, "Price is required"),
-  Quantity: z.string().min(1, "Quantity is required"),
-  image: z.instanceof(File).nullable(),
+  price: z.union([z.string(), z.number().min(1, "Price is required")]),
+  quantity: z.union([z.string(), z.number().min(1, "Quantity is required")]),
+  imageUrl: z.instanceof(File).nullable(),
 });
 
 type FormDataType = z.infer<typeof formSchema>;
 
-const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
+const AddProduct = ({ isEdit, id }: { isEdit: boolean; id?: string }) => {
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useFetchProductById(id ? id : "", isEdit);
+  const { data: category } = useFetchCategories();
+  const { mutate: addProduct } = useSetProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
+
   const form = useForm<FormDataType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,22 +60,40 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
       description: "",
       category: "",
       price: "",
-      Quantity: "",
-      image: null,
+      quantity: "",
+      imageUrl: null,
     },
   });
 
-  const onSubmit = (data: FormDataType) => {
-    console.log("Form Data:", data);
+  // Update form values when product data is fetched
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product?.name || "",
+        description: product?.description || "",
+        category: product?.category || "",
+        price: product?.price || "",
+        quantity: product?.quantity || "",
+        imageUrl: null,
+      });
+    }
+  }, [product, form]);
 
+  const onSubmit = (data: FormDataType) => {
     const formDataToSend = new FormData();
     formDataToSend.append("name", data.name);
     formDataToSend.append("description", data.description);
-    formDataToSend.append("category", data.category);
-    formDataToSend.append("price", data.price);
-    formDataToSend.append("Quantity", data.Quantity);
-    if (data.image) {
-      formDataToSend.append("image", data.image);
+    formDataToSend.append("category", data.category.toString());
+    formDataToSend.append("price", data.price.toString());
+    formDataToSend.append("quantity", data.quantity.toString());
+    if (data.imageUrl) {
+      formDataToSend.append("imageUrl", data.imageUrl);
+    }
+
+    if (isEdit && id) {
+      updateProduct({ id, data: formDataToSend }); // Update existing product
+    } else {
+      addProduct(formDataToSend); // Add new product
     }
   };
 
@@ -88,7 +120,7 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Product Name</FormLabel>
                       <FormControl>
                         <Input
@@ -106,11 +138,11 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
                   control={form.control}
                   name="category"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Category</FormLabel>
                       <Select
+                        value={field.value} // Set value dynamically from form
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -119,52 +151,17 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
                         </FormControl>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="Vegetables">
-                              Vegetables
-                            </SelectItem>
-                            <SelectItem value="Fruits">Fruits</SelectItem>
-                            <SelectItem value="Spices">Spices</SelectItem>
+                            {category?.map((category: any) => (
+                              <SelectItem
+                                key={category._id}
+                                value={category._id}
+                              >
+                                {category.name}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Product Price"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="Quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantity</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Product Quantity"
-                          {...field}
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -187,7 +184,7 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
 
               <FormField
                 control={form.control}
-                name="image"
+                name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Image</FormLabel>
@@ -211,7 +208,7 @@ const AddProduct = ({ isEdit }: { isEdit: boolean }) => {
                   type="submit"
                   className="w-full py-2 hover:bg-yellow-400"
                 >
-                  Add Product
+                  {isEdit ? "Update Product" : "Add Product"}
                 </Button>
                 <Button
                   type="reset"

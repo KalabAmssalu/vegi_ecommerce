@@ -8,6 +8,7 @@ import { validationResult } from "express-validator";
 import { console } from "inspector";
 
 // Create Product Controller
+
 export const createProduct = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -64,6 +65,51 @@ export const createProduct = async (req, res) => {
   }
 };
 
+export const createProductFromMerchant = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Validate request input
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Destructure request body
+    const { name, description, price, quantity, category } = req.body;
+    console.log("category", category);
+    
+
+    // Handle file upload
+    const imageFile = req.file;
+    if (!imageFile) {
+      return res.status(400).json({ msg: "Image file is required" });
+    }
+
+    // Set the image URL
+    const imageUrl = path.posix.join("uploads", imageFile.filename);
+
+    // Create a new Product
+    const product = new Product({
+      merchant: userId,
+      name,
+      description,
+      category,
+      price,
+      quantity,
+      imageUrl, // This now stores the single image URL
+    });
+    console.log("product", product);
+    // Save the Product
+    await product.save();
+
+    res.status(201).json({ msg: "Product created successfully", product });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+};
+
 // Get all products
 export const getMyProduct = async (req, res) => {
   try {
@@ -110,7 +156,10 @@ export const getMyProductsById = async (req, res) => {
     }
 
     // Find the specific product by ID, ensuring it belongs to the merchant
-    const product = await Product.findOne({ _id: req.params.id, merchant: merchant._id })
+    const product = await Product.findOne({
+      _id: req.params.id,
+      merchant: merchant._id,
+    })
       .populate("merchant")
       .populate("category");
 

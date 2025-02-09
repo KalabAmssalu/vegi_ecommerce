@@ -12,52 +12,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-type Customer = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  totalOrders: number;
-};
-
-const customers: Customer[] = [
-  {
-    id: "1",
-    name: "Liam Johnson",
-    email: "liam@example.com",
-    phone: "+1 234 567 890",
-    totalOrders: 15,
-  },
-  {
-    id: "2",
-    name: "Olivia Smith",
-    email: "olivia@example.com",
-    phone: "+1 234 567 891",
-    totalOrders: 12,
-  },
-  {
-    id: "3",
-    name: "Noah Williams",
-    email: "noah@example.com",
-    phone: "+1 234 567 892",
-    totalOrders: 9,
-  },
-  {
-    id: "4",
-    name: "Emma Brown",
-    email: "emma@example.com",
-    phone: "+1 234 567 893",
-    totalOrders: 18,
-  },
-];
+import { useFetchAllCustomers } from "@/action/Query/customer-Query/customer";
+import { Badge } from "@/components/ui/badge";
 
 const CustomerList = () => {
   const [filter, setFilter] = useState<string>("");
   const router = useRouter();
+  const { data: customers } = useFetchAllCustomers();
 
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(filter.toLowerCase())
+  const filteredCustomers = customers?.filter((customer) =>
+    customer?.user.firstName.toLowerCase().includes(filter.toLowerCase())
   );
 
   const viewCustomerDetails = (customerId: string) => {
@@ -84,21 +48,33 @@ const CustomerList = () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Total Orders</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCustomers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>{customer.name}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell>{customer.totalOrders}</TableCell>
+              {filteredCustomers?.map((customer) => (
+                <TableRow key={customer._id}>
+                  <TableCell>
+                    {customer.user.firstName} {customer.user.lastName}
+                  </TableCell>
+                  <TableCell>{customer.user.email}</TableCell>
+                  <TableCell>{customer.user.phoneNumber}</TableCell>
+                  <TableCell>{customer.orderHistory.length}</TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`${
+                        customer.isBlocked ? "bg-red-500" : "bg-green-500"
+                      }`}
+                    >
+                      {customer.isBlocked ? "Blocked" : "Active"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => viewCustomerDetails(customer.id)}
+                      onClick={() => viewCustomerDetails(customer._id)}
                     >
                       View Details
                     </Button>

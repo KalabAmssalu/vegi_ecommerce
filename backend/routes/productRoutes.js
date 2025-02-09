@@ -7,6 +7,7 @@ import {
   deleteProduct,
   getMyProduct,
   getMyProductsById,
+  createProductFromMerchant,
 } from "../controllers/productController.js"; // Adjust the path as necessary
 import upload from "../config/multerconfig.js";
 import auth from "../middleware/auth.js";
@@ -21,6 +22,14 @@ router.post(
   authorize("products", "WRITE"),
   upload.single("imageUrl"),
   createProduct
+);
+
+router.post(
+  "/create",
+  auth, // First authenticate the user
+  authorize("products", "WRITE"),
+  upload.single("imageUrl"),
+  createProductFromMerchant
 );
 
 router.get("/", auth, getAllProducts);
@@ -44,7 +53,12 @@ router.get(
 );
 
 // Get a product by ID (Anyone can view products, including unauthenticated users)
-router.get("/:id", getProductById);
+router.get(
+  "/:id",
+  auth, // First authenticate the user
+  authorize("products", "READ"),
+  getProductById
+);
 
 // Update a product by ID (Merchant only)
 router.put(
@@ -59,8 +73,7 @@ router.put(
 router.delete(
   "/:id",
   auth, // First authenticate the user
-  (req, res, next) =>
-    authorize(req.user.role, "products", "DELETE")(req, res, next),
+  authorize("products", "DELETE"),
   deleteProduct
 );
 

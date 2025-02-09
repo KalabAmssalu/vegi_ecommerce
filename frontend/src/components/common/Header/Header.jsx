@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { menu } from "../../../constant/Headerconstant";
 import { Avater } from "../../../assets/images/Index";
 import { logout } from "../../../slices/UserSlice";
+import { clearCart } from "../../../slices/cartSlice";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -27,6 +28,7 @@ const Header = () => {
     dispatch(logout());
     navigate("/signIn");
     setIsAuth(false);
+    dispatch(clearCart());
   };
 
   return (
@@ -108,9 +110,12 @@ const Header = () => {
                       <li>
                         <Link
                           to="/UserProfile"
-                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          className="block px-4 flex flex-col py-2 text-gray-700 hover:bg-gray-100"
                         >
-                          NAME: {userInfo.firstName + " " + userInfo.lastName}
+                          <span>
+                            NAME: {userInfo.firstName + " " + userInfo.lastName}
+                          </span>
+                          <span>Role: {userInfo.role}</span>
                         </Link>
                       </li>
                       <li>
@@ -140,14 +145,14 @@ const Header = () => {
                           </Link>
                         </li>
                       )}
-                      <li>
+                      {/* <li>
                         <Link
                           to="/UserSettings"
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                         >
                           Settings
                         </Link>
-                      </li>
+                      </li> */}
                       <li>
                         <Link
                           onClick={() => handleLogout()}

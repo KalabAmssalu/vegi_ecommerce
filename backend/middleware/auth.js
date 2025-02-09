@@ -1,20 +1,39 @@
 import jwt from "jsonwebtoken";
 
-const auth = (req, res, next) => {
-  const token = req.cookies.jwt; // Get the token from the cookies
-
-  if (!token) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
-  }
-
+const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach the decoded user info to req.user
-    console.log("decoded", req.user); // Log decoded user
-    next();
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
+    return null; // Return null if token is invalid
   }
 };
 
-export default auth;
+const combinedAuth = (req, res, next) => {
+  // Check for token in cookies first
+  const cookieToken = req.cookies.jwt;
+  if (cookieToken) {
+    const decoded = verifyToken(cookieToken);
+    if (decoded) {
+      req.user = decoded;
+      console.log("Decoded User (Cookie):", req.user);
+      return next();
+    }
+  }
+
+  // If cookie token is missing or invalid, check Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const headerToken = authHeader.split(" ")[1];
+    const decoded = verifyToken(headerToken);
+    if (decoded) {
+      req.user = decoded;
+      console.log("Decoded User (Header):", req.user);
+      return next();
+    }
+  }
+
+  // If no valid tokens found, send error
+  res.status(401).json({ msg: "No valid token, authorization denied" });
+};
+
+export default combinedAuth;

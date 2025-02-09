@@ -1,12 +1,26 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
+import { useEffect } from "react";
+import { useVerifyPayment } from "../../api/order/action";
+import { clearCart } from "../../slices/cartSlice";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { email, name, amount, tx_ref } = useSelector((state) => state.success);
 
+  const { mutate: verifyPayment } = useVerifyPayment();
+  useEffect(() => {
+    if (!tx_ref) {
+      return;
+    } else {
+      const response = verifyPayment(tx_ref);
+      console.log("verify payment", response);
+      dispatch(clearCart());
+    }
+  }, []);
   return (
     <>
       <Header />

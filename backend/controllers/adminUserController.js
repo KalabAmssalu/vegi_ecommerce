@@ -115,14 +115,19 @@ export const loginUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   try {
-    // Check if admin user exists
+    // Find user by email
     let user = await AdminUser.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ msg: "Invalid Credentials" });
+    }
+
+    // Verify if the provided role matches the stored role
+    if (user.role !== role) {
+      return res.status(403).json({ msg: "Access denied. Incorrect role." });
     }
 
     // Compare provided password with the stored hashed password
@@ -133,7 +138,8 @@ export const loginUser = async (req, res) => {
     }
 
     // Generate and send JWT token with user info as an HTTP-only cookie
-    generateToken(res, user);
+    const token = generateToken(res, user);
+    console.log("Generated Token:", token);
 
     // Respond with user data (excluding password)
     res.status(200).json({
@@ -144,6 +150,7 @@ export const loginUser = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       address: user.address,
+      token,
     });
   } catch (err) {
     console.error(err.message);

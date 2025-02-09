@@ -25,11 +25,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useRouter } from "next/navigation";
+import { useLogout } from "@/action/Query/auth-Query/auth";
 
 type Props = {};
 
 const TopBar = (props: Props) => {
   const router = useRouter();
+  const { mutate: logout } = useLogout();
+  const handleLogout = () => {
+    logout();
+  };
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 py-6 ">
       <Sheet>
@@ -109,7 +114,7 @@ const TopBar = (props: Props) => {
             Profile
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push("/auth/sign-in")}>
+          <DropdownMenuItem onClick={() => handleLogout()}>
             Logout
           </DropdownMenuItem>
         </DropdownMenuContent>

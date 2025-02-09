@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 import Customer from "../models/customer.js";
 import Order from "../models/order.js";
+import axios from "axios";
+
 import Payment from "../models/payment.js";
 import { Chapa } from "chapa-nodejs";
-import e from "express";
+import Product from "../models/product.js";
+import Merchant from "../models/merchant.js";
 // Create Payment Endpoint
-
 export const createPayment = async (req, res) => {
   const chapa = new Chapa({
     secretKey: process.env.CHAPA_SECRET_KEY,
   });
+
   try {
     const {
       amount,
@@ -24,6 +27,7 @@ export const createPayment = async (req, res) => {
       paymentMethod,
       products,
     } = req.body;
+
     if (!mongoose.Types.ObjectId.isValid(req.user.userId)) {
       return res.status(400).json({ error: "Invalid user ID format" });
     }
@@ -53,6 +57,7 @@ export const createPayment = async (req, res) => {
         country,
         email,
       },
+      payment_status: false, // Will update after payment
       orderDate: Date.now(),
     });
 
@@ -75,7 +80,7 @@ export const createPayment = async (req, res) => {
       currency: currency || "ETB",
       amount: amount,
       tx_ref: tx_ref,
-      callback_url: "https://example.com/",
+      callback_url: "http://localhost:4000/payment/failed",
       return_url: "http://localhost:4000/payment/success",
       customization: {
         title: "Test Title",
@@ -97,6 +102,46 @@ export const createPayment = async (req, res) => {
       currency: paymentData.currency,
     });
 
+    // Decrease product quantity in the inventory
+    for (const product of products) {
+      const productId = product.id;
+      const quantityPurchased = product.quantity;
+
+      // Find the product by ID
+      const productToUpdate = await Product.findById(productId);
+
+      if (productToUpdate) {
+        // Decrease the product quantity
+        const merchant = await Merchant.findById(productToUpdate.merchant);
+
+        if (merchant) {
+          // Add the order ID to the merchant's orders array
+          merchant.orders.push(orderResponse._id);
+          await merchant.save(); // Save the updated merchant
+          console.log(`Updated merchant ${merchant._id} with new order`);
+        } else {
+          return res
+            .status(404)
+            .json({ error: "Merchant not found for product" });
+        }
+
+        if (productToUpdate.quantity >= quantityPurchased) {
+          productToUpdate.quantity -= quantityPurchased;
+
+          await productToUpdate.save(); // Save the updated product
+          console.log(
+            `Updated product ${productToUpdate.name} quantity to ${productToUpdate.quantity}`
+          );
+        } else {
+          return res
+            .status(400)
+            .json({ error: `Insufficient stock for ${productToUpdate.name}` });
+        }
+      } else {
+        return res.status(404).json({ error: "Product not found" });
+      }
+    }
+
     console.log("payment response", response);
     res.json({
       checkoutUrl: response.data.checkout_url,
@@ -111,21 +156,52 @@ export const createPayment = async (req, res) => {
   }
 };
 
-// Verify Payment Endpoint
 export const verifyPayment = async (req, res) => {
-  const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);
   try {
-    const verification = await chapa.verify(req.params.tx_ref);
+    console.log("Verifying payment:", req.params.id);
+
+    // Define Chapa API URL
+    const url = `https://api.chapa.co/v1/transaction/verify/${req.params.id}`;
+
+    // Send request to Chapa API
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.CHAPA_SECRET_KEY}`,
+      },
+    });
+
+    console.log("Chapa Verification Response:", response.data);
+
+    // Extract tx_ref from Chapa response
+    const txRefFromChapa = response.data?.data?.tx_ref;
+
+    if (!txRefFromChapa) {
+      return res.status(400).json({ error: "Invalid Chapa response" });
+    }
+
+    // Find the payment in the database
+    const payment = await Payment.findOne({ tx_ref: txRefFromChapa });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment record not found" });
+    }
 
     // Update payment status
-    await Payment.findOneAndUpdate(
-      { tx_ref: req.params.tx_ref },
-      { status: verification.status }
-    );
+    payment.paymentStatus = "paid";
+    await payment.save();
 
-    res.json(verification);
+    // Update order status
+    await Order.findByIdAndUpdate(payment.order, {
+      payment_status: true,
+      status: "confirmed",
+    });
+
+    console.log(`Payment ${payment.tx_ref} marked as PAID`);
+
+    res.json(response.data);
   } catch (error) {
-    res.status(400).json({ error: "Verification failed" });
+    console.error("Payment verification error:", error.message);
+    res.status(400).json({ error: error.message });
   }
 };
 

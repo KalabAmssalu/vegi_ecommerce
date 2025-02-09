@@ -24,7 +24,7 @@ const paymentSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "completed", "failed", "refunded"],
+      enum: ["pending", "paid", "failed", "refunded"],
       default: "pending",
       required: true,
     },

@@ -1,13 +1,16 @@
-import createMiddleware from "next-intl/middleware";
-import { defaultLocale, localePrefix, locales } from "../global.il8n";
+import { stackMiddlewares } from "./middlewares/stackMiddleware";
+import { withAuthentication } from "./middlewares/withAuthentication";
+import { withErrorHandler } from "./middlewares/withErrorHandler";
+import { withIntl } from "./middlewares/withIntl";
+import { withLogging } from "./middlewares/withLogging";
 
-const intlMiddleware = createMiddleware({
-  defaultLocale,
-  locales,
-  localePrefix,
-});
-
-export default intlMiddleware;
+const middleware = [
+  withAuthentication,
+  withIntl,
+  withLogging,
+  withErrorHandler,
+];
+export default stackMiddlewares(middleware);
 
 export const config = {
   matcher: [
@@ -20,6 +23,7 @@ export const config = {
 
     // Enable redirects that add missing locales
     // (e.g. `/pathnames` -> `/en/pathnames`)
-    "/((?!_next|_vercel|.*\\..*).*)",
+    // Exclude public directory files
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|docs/.*).*)",
   ],
 };

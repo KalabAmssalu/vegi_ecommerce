@@ -1,30 +1,16 @@
-import { ThemeProvider } from "@/providers/theme-provider";
+import localFont from "next/font/local";
+
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import localFont from "next/font/local";
+import { Toaster } from "sonner";
+
+import StoreProvider from "@/providers/Store-provider";
+import QueryProviders from "@/providers/query-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 // Define the type for the metadata function's parameter
 const myFont = localFont({
   src: "../../../public/fonts/NotoSerifEthiopic-VariableFont_wdth,wght.ttf",
-});
-
-const fontSans = localFont({
-  src: "../../../public/fonts/FiraSans-Regular.ttf",
-  variable: "--font-sans",
-  display: "swap",
-  weight: "400",
-});
-
-const fontMono = localFont({
-  src: "../../../public/fonts/GeistMonoVF.woff",
-  variable: "--font-mono",
-});
-
-// Chromium browsers flags emojis fix
-const fontFlag = localFont({
-  display: "auto",
-  src: "../../../public/fonts/Twemoji-Flags.woff2",
-  variable: "--font-twemoji",
 });
 
 export default async function LocaleLayout({
@@ -40,17 +26,28 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>"
+        ></link>
+      </head>
       <body className={myFont.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextIntlClientProvider messages={messages}>
-            {children}
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <QueryProviders>
+          <StoreProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NextIntlClientProvider messages={messages}>
+                {children}
+                <Toaster position="bottom-right" />
+              </NextIntlClientProvider>
+            </ThemeProvider>
+          </StoreProvider>
+        </QueryProviders>
       </body>
     </html>
   );

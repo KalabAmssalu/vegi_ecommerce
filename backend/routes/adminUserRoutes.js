@@ -14,10 +14,7 @@ const router = express.Router();
 
 router.post("/login", loginUser);
 // Create a new admin user (Admin only)
-router.post(
-  "/", // Only Admins can create admin users
-  createAdminUser
-);
+router.post("/", createAdminUser);
 
 // Get all admin users (Admin only)
 router.get(

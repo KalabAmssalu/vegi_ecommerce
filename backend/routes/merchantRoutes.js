@@ -5,6 +5,7 @@ import {
   getMerchantById,
   updateMerchant,
   deleteMerchant,
+  getMyOrders,
 } from "../controllers/merchantController.js"; // Adjust the path as necessary
 import upload from "../config/multerconfig.js";
 import auth from "../middleware/auth.js";
@@ -14,10 +15,13 @@ import authorizeMultipleRoles from "../middleware/multiAutorize.js"; // Import t
 const router = express.Router();
 
 // Create a new merchant (Admin and Manager only)
-router.post(
-  "/",
-  upload.single("trade_permit"),
-  createMerchant
+router.post("/", upload.single("trade_permit"), createMerchant);
+
+router.get(
+  "/myorders",
+  auth, // Authenticate the user
+  authorize("merchants", "READ"),
+  getMyOrders
 );
 
 // Get all merchants (Admin and Manager only)

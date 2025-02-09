@@ -33,104 +33,66 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OrderDetail from "@/components/modules/orders/OrderDetail";
+import { useFetchMyOrders } from "@/action/Query/order-Query/order";
+import { OrderType } from "@/types/order/order";
 
-type Order = {
-  id: string;
-  customer: string;
-  status: string;
-  amount: string;
-  date: string;
-  items: { name: string; quantity: number; price: string }[];
-  deliveryInfo: { name: string; address: string };
-  paymentInfo: { method: string; lastFour: string };
+const filterOrdersByPeriod = (
+  orders: OrderType[],
+  period: "week" | "month" | "year"
+) => {
+  const now = new Date();
+  return orders.filter((order) => {
+    const orderDate = new Date(order.orderDate);
+    const timeNow = new Date(now); // Clone the original date
+
+    if (period === "week") {
+      const startOfWeek = new Date(
+        timeNow.setDate(timeNow.getDate() - timeNow.getDay())
+      );
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 7);
+      return orderDate >= startOfWeek && orderDate <= endOfWeek;
+    } else if (period === "month") {
+      return (
+        orderDate.getMonth() === timeNow.getMonth() &&
+        orderDate.getFullYear() === timeNow.getFullYear()
+      );
+    } else if (period === "year") {
+      return orderDate.getFullYear() === timeNow.getFullYear();
+    }
+    return false;
+  });
+};
+const calculateTotalAmount = (orders: OrderType[]): number => {
+  return orders.reduce((total, order) => total + order.totalAmount, 0);
 };
 
-const orders: Order[] = [
-  {
-    id: "1",
-    customer: "Liam Johnson",
-    status: "Fulfilled",
-    amount: "$250.00",
-    date: "November 23, 2023",
-    items: [
-      { name: "Glimmer Lamps", quantity: 2, price: "$250.00" },
-      { name: "Aqua Filters", quantity: 1, price: "$49.00" },
-    ],
-    deliveryInfo: {
-      name: "Liam Johnson",
-      address: "1234 Main St., Anytown, CA 12345",
-    },
-    paymentInfo: { method: "Visa", lastFour: "4532" },
-  },
-  {
-    id: "2",
-    customer: "Olivia Smith",
-    status: "Declined",
-    amount: "$150.00",
-    date: "November 22, 2023",
-    items: [{ name: "Water Purifier", quantity: 1, price: "$150.00" }],
-    deliveryInfo: {
-      name: "Olivia Smith",
-      address: "5678 First Ave., Othertown, CA 67890",
-    },
-    paymentInfo: { method: "MasterCard", lastFour: "7890" },
-  },
-  {
-    id: "3",
-    customer: "Danat Ted",
-    status: "Fulfilled",
-    amount: "$250.00",
-    date: "November 23, 2023",
-    items: [
-      { name: "Glimmer Lamps", quantity: 2, price: "$250.00" },
-      { name: "Aqua Filters", quantity: 1, price: "$49.00" },
-    ],
-    deliveryInfo: {
-      name: "Liam Johnson",
-      address: "1234 Main St., Anytown, CA 12345",
-    },
-    paymentInfo: { method: "Visa", lastFour: "4532" },
-  },
-  {
-    id: "3",
-    customer: "Danat Ted",
-    status: "Fulfilled",
-    amount: "$250.00",
-    date: "November 23, 2023",
-    items: [
-      { name: "Glimmer Lamps", quantity: 2, price: "$250.00" },
-      { name: "Aqua Filters", quantity: 1, price: "$49.00" },
-    ],
-    deliveryInfo: {
-      name: "Liam Johnson",
-      address: "1234 Main St., Anytown, CA 12345",
-    },
-    paymentInfo: { method: "Visa", lastFour: "4532" },
-  },
-  {
-    id: "3",
-    customer: "Danat Ted",
-    status: "Fulfilled",
-    amount: "$250.00",
-    date: "November 23, 2023",
-    items: [
-      { name: "Glimmer Lamps", quantity: 2, price: "$250.00" },
-      { name: "Aqua Filters", quantity: 1, price: "$49.00" },
-    ],
-    deliveryInfo: {
-      name: "Liam Johnson",
-      address: "1234 Main St., Anytown, CA 12345",
-    },
-    paymentInfo: { method: "Visa", lastFour: "4532" },
-  },
-];
-
 const OrderScreen = () => {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+  const { data: orders } = useFetchMyOrders();
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    "week" | "month" | "year"
+  >("week");
 
-  const viewOrderDetails = (order: Order) => {
+  const viewOrderDetails = (order: OrderType) => {
     setSelectedOrder(order);
   };
+
+  // Filter orders based on the selected period (week, month, year)
+  const filteredOrders = orders
+    ? filterOrdersByPeriod(orders, selectedPeriod)
+    : [];
+  // Filter orders based on the selected period (week, month, year)
+  const filteredOrdersForWeek = orders
+    ? filterOrdersByPeriod(orders, "week")
+    : [];
+  const filteredOrdersForMonth = orders
+    ? filterOrdersByPeriod(orders, "month")
+    : [];
+
+  // Calculate the total amount for this week and this month
+  const totalAmountForWeek = calculateTotalAmount(filteredOrdersForWeek);
+  const totalAmountForMonth = calculateTotalAmount(filteredOrdersForMonth);
 
   return (
     <div className="p-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -139,7 +101,9 @@ const OrderScreen = () => {
           <Card>
             <CardHeader>
               <CardDescription>This Week</CardDescription>
-              <CardTitle className="text-3xl">$1,329</CardTitle>
+              <CardTitle className="text-3xl">
+                ${totalAmountForWeek.toFixed(2)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">
@@ -151,7 +115,9 @@ const OrderScreen = () => {
           <Card>
             <CardHeader>
               <CardDescription>This Month</CardDescription>
-              <CardTitle className="text-3xl">$5,329</CardTitle>
+              <CardTitle className="text-3xl">
+                ${totalAmountForMonth.toFixed(2)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">
@@ -161,7 +127,11 @@ const OrderScreen = () => {
             </CardContent>
           </Card>
         </div>
-        <Tabs defaultValue="week">
+
+        <Tabs
+          value={selectedPeriod}
+          onValueChange={(value) => setSelectedPeriod(value as any)}
+        >
           <div className="flex items-center">
             <TabsList>
               <TabsTrigger value="week">Week</TabsTrigger>
@@ -188,6 +158,8 @@ const OrderScreen = () => {
               </Button>
             </div>
           </div>
+
+          {/* Week Tab Content */}
           <TabsContent value="week">
             <Card>
               <CardHeader className="px-6 py-4">
@@ -207,34 +179,141 @@ const OrderScreen = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell>{order.customer}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              order.status === "Fulfilled"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {order.amount}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => viewOrderDetails(order)}
-                          >
-                            View Details
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {filteredOrders &&
+                      filteredOrders.map((order) => (
+                        <TableRow key={order._id}>
+                          <TableCell>{order.customer.user}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.status === "Fulfilled"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {order.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${order.totalAmount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewOrderDetails(order)}
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Month Tab Content */}
+          <TabsContent value="month">
+            <Card>
+              <CardHeader className="px-6 py-4">
+                <CardTitle>Orders</CardTitle>
+                <CardDescription>Orders from this month.</CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-y-auto max-h-60">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders &&
+                      filteredOrders.map((order) => (
+                        <TableRow key={order._id}>
+                          <TableCell>{order.customer.user}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.status === "Fulfilled"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {order.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${order.totalAmount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewOrderDetails(order)}
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Year Tab Content */}
+          <TabsContent value="year">
+            <Card>
+              <CardHeader className="px-6 py-4">
+                <CardTitle>Orders</CardTitle>
+                <CardDescription>Orders from this year.</CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-y-auto max-h-60">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders &&
+                      filteredOrders.map((order) => (
+                        <TableRow key={order._id}>
+                          <TableCell>{order.customer.user}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.status === "Fulfilled"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {order.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${order.totalAmount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewOrderDetails(order)}
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </CardContent>

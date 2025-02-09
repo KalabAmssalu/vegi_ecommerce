@@ -112,6 +112,30 @@ export const updateCustomer = async (req, res) => {
   }
 };
 
+export const deactivateCustomer = async (req, res) => {
+  try {
+    // Fetch the customer by ID
+    const customer = await Customer.findById(req.params.id)
+      .populate("user")
+      .populate("orderHistory");
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    // Toggle the `isBlocked` field (if it's true, set to false; if false, set to true)
+    customer.isBlocked = !customer.isBlocked;
+
+    // Save the updated customer document
+    const updatedCustomer = await customer.save();
+
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error(error.message);
+    res.status(400).json({ message: "Error updating customer block status" });
+  }
+};
+
 // Delete a customer
 export const deleteCustomer = async (req, res) => {
   try {

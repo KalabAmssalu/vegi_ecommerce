@@ -44,6 +44,7 @@ const rolesPermissions = {
     resources: {
       products: [ACTIONS.READ, ACTIONS.WRITE, ACTIONS.DELETE],
       productreviews: [ACTIONS.READ],
+      merchants: [ACTIONS.READ, ACTIONS.WRITE],
       categories: [ACTIONS.READ],
       orders: [ACTIONS.READ],
       customers: [ACTIONS.READ],

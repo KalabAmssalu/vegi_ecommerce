@@ -76,6 +76,22 @@ export const createOrder = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+export const getRecentOrders = async (req, res) => {
+  try {
+    console.log("orders recent");
+    const orders = await Order.find()
+      .sort({ orderDate: -1 }) // Sort by orderDate in descending order (most recent first)
+      .limit(5) // Limit results to 5 recent orders
+      .populate("customer")
+      .populate("products.product")
+      .populate("deliveryPerson");
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error fetching recent orders" });
+  }
+};
 
 // Get all orders
 export const getAllOrders = async (req, res) => {
@@ -92,15 +108,40 @@ export const getAllOrders = async (req, res) => {
 };
 
 // Get an order by ID
+export const getMyOrderById = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const customer = await Customer.findOne({ user: userId });
+    console.log("customer", customer);
+
+    const orders = await Order.find({ customer: customer._id }) // Fetch all orders instead of one
+      .populate("customer")
+      .populate("products.product")
+      .populate("deliveryPerson");
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+
+    res.status(200).json(orders); // Send an array instead of a single object
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error fetching orders" });
+  }
+};
+
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate("customer")
       .populate("products.product")
       .populate("deliveryPerson");
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
+    order.customer = await Customer.findById(order.customer).populate("user");
+    console.log("order", order);
     res.status(200).json(order);
   } catch (error) {
     console.error(error.message);

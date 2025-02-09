@@ -11,9 +11,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/hooks/storehooks";
+import { useFetchStatsDashboard } from "@/action/Query/stat-Query";
+import { useFetchRecentOrders } from "@/action/Query/order-Query/order";
+import { useFetchAllCustomers } from "@/action/Query/customer-Query/customer";
+import { formatDate } from "@/lib/utils/dateUtils";
 
 const Dashboard = () => {
+  const { currentUser } = useAppSelector((state) => state.currentUser);
+  const { data: stats } = useFetchStatsDashboard();
+  const { data: recentOrders } = useFetchRecentOrders();
+  const { data: customers } = useFetchAllCustomers();
+
+  // Limit the number of customers to 5
+  const limitedCustomers = customers?.slice(0, 5);
+
   return (
     <div className="p-0 grid gap-6">
       {/* Header */}
@@ -23,26 +35,27 @@ const Dashboard = () => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex items-center">
-            <User className="h-8 w-8 text-blue-500" />
-            <CardTitle className="ml-4">Total Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">1,200</p>
-            <p className="text-sm text-muted-foreground">
-              +20% from last month
-            </p>
-          </CardContent>
-        </Card>
-
+        {currentUser.role === "admin" && (
+          <Card>
+            <CardHeader className="flex items-center">
+              <User className="h-8 w-8 text-blue-500" />
+              <CardTitle className="ml-4">Total Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{stats?.totalUsers}</p>
+              <p className="text-sm text-muted-foreground">
+                +20% from last month
+              </p>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader className="flex items-center">
             <ShoppingCart className="h-8 w-8 text-green-500" />
             <CardTitle className="ml-4">Total Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">$45,000</p>
+            <p className="text-3xl font-bold">${stats?.totalSales}</p>
             <p className="text-sm text-muted-foreground">
               +15% from last month
             </p>
@@ -55,7 +68,7 @@ const Dashboard = () => {
             <CardTitle className="ml-4">Deliveries</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">320</p>
+            <p className="text-3xl font-bold">{stats?.deliveredOrders}</p>
             <p className="text-sm text-muted-foreground">
               +10% from last month
             </p>
@@ -68,7 +81,7 @@ const Dashboard = () => {
             <CardTitle className="ml-4">Monthly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">$12,500</p>
+            <p className="text-3xl font-bold">${stats?.monthlySales}</p>
             <p className="text-sm text-muted-foreground">+8% from last month</p>
           </CardContent>
         </Card>
@@ -98,24 +111,16 @@ const Dashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>#12345</TableCell>
-                    <TableCell>2024-08-01</TableCell>
-                    <TableCell>Shipped</TableCell>
-                    <TableCell className="text-right">$299.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>#12346</TableCell>
-                    <TableCell>2024-08-02</TableCell>
-                    <TableCell>Processing</TableCell>
-                    <TableCell className="text-right">$150.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>#12347</TableCell>
-                    <TableCell>2024-08-03</TableCell>
-                    <TableCell>Delivered</TableCell>
-                    <TableCell className="text-right">$450.00</TableCell>
-                  </TableRow>
+                  {recentOrders?.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell>{`#${order._id}`}</TableCell>
+                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{order.status}</TableCell>
+                      <TableCell className="text-right">
+                        ${order.totalAmount}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -130,31 +135,23 @@ const Dashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User ID</TableHead>
-                    <TableHead>Name</TableHead>
+                    <TableHead>first Name</TableHead>
+                    <TableHead>Last Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Signup Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>#001</TableCell>
-                    <TableCell>John Doe</TableCell>
-                    <TableCell>john@example.com</TableCell>
-                    <TableCell className="text-right">2024-08-01</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>#002</TableCell>
-                    <TableCell>Jane Smith</TableCell>
-                    <TableCell>jane@example.com</TableCell>
-                    <TableCell className="text-right">2024-08-02</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>#003</TableCell>
-                    <TableCell>Mark Johnson</TableCell>
-                    <TableCell>mark@example.com</TableCell>
-                    <TableCell className="text-right">2024-08-03</TableCell>
-                  </TableRow>
+                  {limitedCustomers?.map((customer, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{customer.user.firstName}</TableCell>
+                      <TableCell>{customer.user.lastName}</TableCell>
+                      <TableCell>{customer.user.email}</TableCell>
+                      <TableCell className="text-right">
+                        {formatDate(customer.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>

@@ -19,10 +19,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  useDeactivateCustomer,
+  useFetchCustomerById,
+} from "@/action/Query/customer-Query/customer";
 
-type Props = {};
+type Props = {
+  id: string;
+};
 
-const CustomerDashboard = (props: Props) => {
+const CustomerDashboard = ({ id }: Props) => {
+  const { data: customer } = useFetchCustomerById(id);
+  const { mutate: deactivateAccount } = useDeactivateCustomer();
+
+  // If customer data is not available, you can show loading or fallback UI
+  if (!customer) {
+    return <div>Loading...</div>;
+  }
+
+  const handleDeactivateAccount = () => {
+    deactivateAccount(id);
+    console.log("Deactivate Account");
+  };
+
   return (
     <main className="grid gap-6 p-6 lg:grid-cols-4">
       {/* Overview Cards */}
@@ -35,17 +54,20 @@ const CustomerDashboard = (props: Props) => {
           <CardContent>
             <div className="grid gap-2 text-sm">
               <div>
-                <span className="font-medium">Name:</span> Liam Johnson
+                <span className="font-medium">Name:</span>{" "}
+                {customer.user.firstName} {customer.user.lastName}
               </div>
               <div>
-                <span className="font-medium">Email:</span> liam@example.com
+                <span className="font-medium">Email:</span>{" "}
+                {customer.user.email}
               </div>
               <div>
-                <span className="font-medium">Phone:</span> +1 234 567 890
+                <span className="font-medium">Phone:</span>{" "}
+                {customer.user.phoneNumber}
               </div>
               <div>
-                <span className="font-medium">Address:</span> 1234 Main St.,
-                Anytown, CA 12345
+                <span className="font-medium">Address:</span>{" "}
+                {customer.user.address}
               </div>
             </div>
           </CardContent>
@@ -73,7 +95,9 @@ const CustomerDashboard = (props: Props) => {
             <CardTitle>Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">15</div>
+            <div className="text-3xl font-bold">
+              {customer.orderHistory.length}
+            </div>
             <CardDescription className="text-sm">Total Orders</CardDescription>
           </CardContent>
         </Card>
@@ -112,30 +136,34 @@ const CustomerDashboard = (props: Props) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>#12345</TableCell>
-                      <TableCell>2024-08-01</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">Shipped</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">$299.00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>#12344</TableCell>
-                      <TableCell>2024-07-15</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">Delivered</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">$150.00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>#12343</TableCell>
-                      <TableCell>2024-07-05</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">Pending</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">$450.00</TableCell>
-                    </TableRow>
+                    {customer.orderHistory.length > 0 ? (
+                      customer.orderHistory.map((order: any, index: number) => (
+                        <TableRow key={order._id || index}>
+                          {" "}
+                          {/* Use a unique identifier like order._id */}
+                          <TableCell>{order._id}</TableCell>{" "}
+                          {/* Assuming _id is the order ID */}
+                          <TableCell>
+                            {new Date(order.orderDate).toLocaleDateString()}
+                          </TableCell>{" "}
+                          {/* Format the date */}
+                          <TableCell>
+                            <Badge variant="secondary">{order.status}</Badge>{" "}
+                            {/* Order status */}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${order.totalAmount?.toFixed(2)}
+                          </TableCell>{" "}
+                          {/* Total Amount */}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                          No orders found
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -147,8 +175,12 @@ const CustomerDashboard = (props: Props) => {
                 <CardTitle>Account Settings</CardTitle>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full mb-2">
-                  Deactivate Account
+                <Button
+                  variant="outline"
+                  className={`w-full mb-2 ${customer.isBlocked ? "bg-red-500" : "bg-green-500"}`}
+                  onClick={() => handleDeactivateAccount()}
+                >
+                 {customer.isBlocked ? "Activate Account" : "Deactivate Account"}
                 </Button>
               </CardContent>
             </Card>

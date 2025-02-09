@@ -13,18 +13,10 @@ import {
 } from "@/components/ui/card";
 
 import { Separator } from "@/components/ui/separator";
+import { OrderType } from "@/types/order/order";
 
 type OrderDetailProps = {
-  order: {
-    id: string;
-    customer: string;
-    status: string;
-    amount: string;
-    date: string;
-    items: { name: string; quantity: number; price: string }[];
-    deliveryInfo: { name: string; address: string };
-    paymentInfo: { method: string; lastFour: string };
-  };
+  order: OrderType;
 };
 
 const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
@@ -37,16 +29,20 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
             <Copy className="h-4 w-4" />
           </Button>
         </CardTitle>
-        <CardDescription>Date: {order.date}</CardDescription>
+        <CardDescription>Date: {new Date(order.orderDate).toLocaleDateString()}</CardDescription>
+        <div className="text-sm text-muted-foreground">Order ID: {order._id}</div>
+        <div className="text-xs text-muted-foreground">
+          Status: <span className="font-semibold">{order.status}</span>
+        </div>
       </CardHeader>
       <CardContent className="p-6 text-sm">
         <ul className="grid gap-3">
-          {order.items.map((item, index) => (
+          {order.products.map((product, index) => (
             <li key={index} className="flex justify-between">
               <span>
-                {item.name} x{item.quantity}
+                {product.product.name} x{product.quantity}
               </span>
-              <span>{item.price}</span>
+              <span>${product.price}</span>
             </li>
           ))}
         </ul>
@@ -54,16 +50,15 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
         <ul className="grid gap-3">
           <li className="flex justify-between">
             <span>Subtotal</span>
-            <span>{order.amount}</span>
+            <span>${order.totalAmount}</span>
           </li>
           <li className="flex justify-between">
             <span>Tax</span>
-            <span>$25.00</span>{" "}
-            {/* Replace with actual tax amount if available */}
+            <span>$25.00</span> {/* Replace with actual tax amount if available */}
           </li>
           <li className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>{order.amount}</span>
+            <span>${order.totalAmount}</span>
           </li>
         </ul>
         <Separator className="my-4" />
@@ -71,9 +66,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
           <div>
             <div className="font-semibold">Delivery Information</div>
             <address className="not-italic text-muted-foreground">
-              <span>{order.deliveryInfo.name}</span>
+              <span>{order.delivery_address.street}</span>
               <br />
-              <span>{order.deliveryInfo.address}</span>
+              <span>{order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.postal_code}</span>
+              <br />
+              <span>{order.delivery_address.country}</span>
+              <br />
+              <span>{order.delivery_address.email}</span>
             </address>
           </div>
         </div>
@@ -83,14 +82,14 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
           <div className="flex justify-between">
             <span className="flex items-center gap-1">
               <CreditCard className="h-4 w-4" />
-              {order.paymentInfo.method} ending in {order.paymentInfo.lastFour}
+              {order.payment_status ? "Paid" : "Pending"}
             </span>
           </div>
         </div>
       </CardContent>
       <CardFooter className="flex items-center bg-muted/50 px-6 py-3">
         <div className="text-xs text-muted-foreground">
-          Updated {order.date}
+          Updated {new Date(order.updatedAt).toLocaleDateString()}
         </div>
         <div className="ml-auto flex items-center gap-2">
           <Button size="icon" variant="outline">

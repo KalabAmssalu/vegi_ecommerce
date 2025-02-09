@@ -5,10 +5,10 @@ import {
   getCustomerById,
   updateCustomer,
   deleteCustomer,
+  deactivateCustomer,
 } from "../controllers/customerController.js"; // Adjust the path as necessary
 import auth from "../middleware/auth.js";
 import authorize from "../middleware/authorization.js";
-import authorizeMultipleRoles from "../middleware/multiAutorize.js"; // Import the authorization middleware
 
 const router = express.Router();
 
@@ -25,10 +25,11 @@ router.get("/:id", auth, authorize("customers", "READ"), getCustomerById);
 router.put(
   "/:id",
   auth, // Authenticate the user
-  auth,
   authorize("customers", "WRITE"),
   updateCustomer
 );
+
+router.put("/deactivate/:id", auth, authorize("customers", "WRITE"), deactivateCustomer);
 
 // Delete a customer by ID (Admin and Manager only)
 router.delete("/:id", auth, authorize("customers", "DELETE"), deleteCustomer);

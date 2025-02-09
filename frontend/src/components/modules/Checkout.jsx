@@ -157,7 +157,7 @@ const Checkout = () => {
               className="p-3 border rounded-lg w-full"
             >
               <option value="chapa">Chapa</option>
-              <option value="paypal">PayPal</option>
+            
             </select>
           </div>
 

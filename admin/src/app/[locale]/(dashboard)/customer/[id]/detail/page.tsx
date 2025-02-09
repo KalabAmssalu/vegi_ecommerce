@@ -1,12 +1,18 @@
+"use client";
 import CustomerDashboard from "@/components/modules/customer/CustomerDetail";
+import { useParams } from "next/navigation";
 import React from "react";
 
-type Props = {};
+const CustomerDetailPage = () => {
+  const { id } = useParams();
+  const customerId = Array.isArray(id) ? id[0] : id;
 
-const CustomerDetailPage = (props: Props) => {
+  if (!customerId) {
+    return <div>No valid customer ID provided</div>;
+  }
   return (
     <div>
-      <CustomerDashboard />
+      <CustomerDashboard id={customerId} />
     </div>
   );
 };

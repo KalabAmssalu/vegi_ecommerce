@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, CreditCard } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,35 @@ import {
 
 import { Separator } from "@/components/ui/separator";
 import { OrderType } from "@/types/order/order";
+import { useFetchDelivery } from "@/action/Query/delivery-Query/delivery";
+import { useUpdateDeliveryOrder } from "@/action/Query/order-Query/order";
 
 type OrderDetailProps = {
   order: OrderType;
 };
 
 const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDeliveryPerson, setSelectedDeliveryPerson] =
+    useState<string>("");
+  const { data: deliveryPersonData, isLoading } = useFetchDelivery();
+  const { mutate: updateOrder } = useUpdateDeliveryOrder();
+
+  const handleOpenDialog = (open: boolean) => {
+    setIsOpen(open);
+  };
+
+  const handleAssignDeliveryPerson = () => {
+    if (selectedDeliveryPerson) {
+      updateOrder({
+        id: order._id,
+        data: selectedDeliveryPerson,
+      });
+      setIsOpen(false); // Close the dialog after successful update
+    } else {
+      alert("Please select a delivery person");
+    }
+  };
   return (
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-col bg-muted/50">
@@ -29,11 +52,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
             <Copy className="h-4 w-4" />
           </Button>
         </CardTitle>
-        <CardDescription>Date: {new Date(order.orderDate).toLocaleDateString()}</CardDescription>
-        <div className="text-sm text-muted-foreground">Order ID: {order._id}</div>
+        <CardDescription>
+          Date: {new Date(order.orderDate).toLocaleDateString()}
+        </CardDescription>
+        <div className="text-sm text-muted-foreground">
+          Order ID: {order._id}
+        </div>
         <div className="text-xs text-muted-foreground">
           Status: <span className="font-semibold">{order.status}</span>
         </div>
+        <Button onClick={() => handleOpenDialog(true)}>
+          Allocate to Delivery
+        </Button>
       </CardHeader>
       <CardContent className="p-6 text-sm">
         <ul className="grid gap-3">
@@ -54,7 +84,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
           </li>
           <li className="flex justify-between">
             <span>Tax</span>
-            <span>$25.00</span> {/* Replace with actual tax amount if available */}
+            <span>$25.00</span>{" "}
+            {/* Replace with actual tax amount if available */}
           </li>
           <li className="flex justify-between font-semibold">
             <span>Total</span>
@@ -68,7 +99,10 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
             <address className="not-italic text-muted-foreground">
               <span>{order.delivery_address.street}</span>
               <br />
-              <span>{order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.postal_code}</span>
+              <span>
+                {order.delivery_address.city}, {order.delivery_address.state}{" "}
+                {order.delivery_address.postal_code}
+              </span>
               <br />
               <span>{order.delivery_address.country}</span>
               <br />
@@ -100,6 +134,52 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
           </Button>
         </div>
       </CardFooter>
+      {/* Dialog for Assigning Delivery Person */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-muted p-6 rounded-lg w-96">
+            <h3 className="text-lg font-semibold">Assign Delivery Person</h3>
+            <Separator className="my-2" />
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="deliveryPerson"
+                  className="block text-sm font-medium"
+                >
+                  Select Delivery Person
+                </label>
+                <select
+                  id="deliveryPerson"
+                  value={selectedDeliveryPerson}
+                  onChange={(e) => setSelectedDeliveryPerson(e.target.value)}
+                  className="w-full p-2 border border-muted rounded-md"
+                >
+                  <option value="">Select Delivery Person</option>
+                  {isLoading ? (
+                    <option>Loading...</option>
+                  ) : (
+                    deliveryPersonData?.map((person) => (
+                      <option key={person._id} value={person._id}>
+                        {person.user.firstName} {person.user.lastName}
+                        {/* Assuming the name is on the user object */}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+              <div className="flex justify-end gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => handleOpenDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleAssignDeliveryPerson}>Assign</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };

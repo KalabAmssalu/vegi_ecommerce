@@ -1,4 +1,4 @@
-export interface DeliveryPersonType {
+export interface Deliveryusertype {
   role: string;
   firstName: string;
   lastName: string;

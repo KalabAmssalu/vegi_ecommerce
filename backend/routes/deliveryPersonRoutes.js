@@ -5,10 +5,10 @@ import {
   getDeliveryPersonById,
   updateDeliveryPerson,
   deleteDeliveryPerson,
+  blockDeliveryPerson,
 } from "../controllers/deliveryPersonController.js";
 import auth from "../middleware/auth.js";
 import authorize from "../middleware/authorization.js";
-import authorizeMultipleRoles from "../middleware/multiAutorize.js"; // Import the authorization middleware
 
 const router = express.Router();
 
@@ -16,32 +16,28 @@ const router = express.Router();
 router.post(
   "/",
   auth, // Authenticate the user
-  authorizeMultipleRoles(["Admin", "Manager"], "deliverypeople", "WRITE"), // Authorize based on the user's role
+  authorize("deliverypeople", "WRITE"), // Authorize based on the user's role
   createDeliveryPerson
 );
 
-// Get all delivery persons (Admin and Manager only)
 router.get(
   "/",
   auth, // Authenticate the user
-  authorizeMultipleRoles(["Admin", "Manager"], "deliverypeople", "READ"), // Authorize based on the user's role
+  authorize("deliverypeople", "READ"), // Authorize based on the user's role
   getAllDeliveryPersons
 );
 
+router.put(
+  "/block/:id",
+  auth, // Authenticate the user
+  authorize("deliverypeople", "WRITE"), // Authorize based on the user's role
+  blockDeliveryPerson
+);
 // Get a delivery person by ID (Admin, Manager, or the DeliveryPerson themselves)
 router.get(
   "/:id",
   auth, // Authenticate the user
-  (req, res, next) => {
-    if (
-      ["Admin", "Manager"].includes(req.user.role) ||
-      req.user.id === req.params.id
-    ) {
-      next();
-    } else {
-      res.status(403).json({ message: "Permission denied" });
-    }
-  },
+  authorize("deliverypeople", "READ"), // Authorize based on the user's role
   getDeliveryPersonById
 );
 
@@ -49,16 +45,7 @@ router.get(
 router.put(
   "/:id",
   auth, // Authenticate the user
-  (req, res, next) => {
-    if (
-      ["Admin", "Manager"].includes(req.user.role) ||
-      req.user.id === req.params.id
-    ) {
-      next();
-    } else {
-      res.status(403).json({ message: "Permission denied" });
-    }
-  },
+  authorize("deliverypeople", "WRITE"), // Authorize based on the user's role
   updateDeliveryPerson
 );
 
@@ -66,7 +53,7 @@ router.put(
 router.delete(
   "/:id",
   auth, // Authenticate the user
-  authorizeMultipleRoles(["Admin"], "deliverypeople", "DELETE"), // Only Admins can delete delivery persons
+  authorize("deliverypeople", "DELETE"), // Only Admins can delete delivery persons
   deleteDeliveryPerson
 );
 

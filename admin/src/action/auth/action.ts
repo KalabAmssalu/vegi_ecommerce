@@ -85,7 +85,7 @@ export async function signIn(credentials: ICredentials) {
 
     return {
       ok: true,
-      message: "Wellcome to Atikeltera Admin page",
+      message: "Welcome to Atikeltera Admin page",
       data: response.data,
     };
   } catch (error: any) {

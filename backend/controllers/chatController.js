@@ -1,150 +1,102 @@
-import Chat from "../models/chat.js";
-import Message from "../models/message.js";
+import natural from "natural";
+import FAQ from "../models/faq.js";
 
-// Start a new chat
-export const startChat = async (req, res) => {
-  const { customer, manager, text } = req.body;
+const tokenizer = new natural.WordTokenizer();
+const stemmer = natural.PorterStemmer;
 
+// Helper function to extract keywords
+const extractKeywords = (message) => {
+  const tokens = tokenizer.tokenize(message.toLowerCase());
+  const stopWords = new Set(["how", "to", "a", "the", "is", "in", "on", "for"]);
+
+  return tokens
+    .filter((token) => !stopWords.has(token))
+    .map((token) => stemmer.stem(token));
+};
+
+export const handleChat = async (req, res) => {
   try {
-    // Create a new chat
-    const chat = new Chat({
-      customer,
-      manager,
+    const { message } = req.body;
+    const userKeywords = extractKeywords(message);
+    const faqs = await FAQ.find({});
+
+    let bestMatch = null;
+    let maxMatches = 0;
+
+    faqs.forEach((faq) => {
+      const matches = faq.keywords.filter((k) =>
+        userKeywords.includes(k)
+      ).length;
+
+      if (
+        matches > maxMatches ||
+        (matches === maxMatches && faq.priority > (bestMatch?.priority || 0))
+      ) {
+        maxMatches = matches;
+        bestMatch = faq;
+      }
     });
 
-    // Create the initial message
-    const message = new Message({
-      chat: chat._id,
-      sender: "customer", // Assuming the first message is from the customer
-      text,
+    res.json({
+      answer:
+        bestMatch?.answer ||
+        "Sorry, I don't understand. Please contact support.",
+      keywords: userKeywords,
     });
-
-    // Save the message
-    await message.save();
-
-    // Add the message to the chat
-    chat.messages.push(message._id);
-
-    // Save the chat
-    await chat.save();
-
-    res.status(201).json(chat);
-  } catch (error) {
-    console.error("Error starting chat:", error.message);
-    res.status(500).json({ message: "Error starting chat" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
-// Send a message in a chat
-export const sendMessage = async (req, res) => {
-  const { chatId, sender, text } = req.body;
-
+export const addFAQ = async (req, res) => {
   try {
-    // Find the chat
-    const chat = await Chat.findById(chatId);
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
-
-    // Create a new message
-    const message = new Message({
-      chat: chat._id,
-      sender,
-      text,
-    });
-
-    // Save the message
-    await message.save();
-
-    // Add the message to the chat
-    chat.messages.push(message._id);
-    chat.lastUpdated = Date.now();
-
-    // Save the chat
-    await chat.save();
-
-    res.status(201).json(message);
-  } catch (error) {
-    console.error("Error sending message:", error.message);
-    res.status(500).json({ message: "Error sending message" });
+    const { keywords, answer, priority } = req.body;
+    const newFAQ = new FAQ({ keywords, answer, priority });
+    await newFAQ.save();
+    res.json(newFAQ);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
   }
 };
 
-// Get all messages in a chat
-export const getChatMessages = async (req, res) => {
+export const bulkUploadFAQs = async (req, res) => {
   try {
-    const chat = await Chat.findById(req.params.chatId)
-      .populate("messages")
-      .populate("customer")
-      .populate("manager");
+    const faqs = req.body; // Expecting an array of FAQ objects
 
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
+    if (!Array.isArray(faqs) || faqs.length === 0) {
+      return res.status(400).json({ error: "Invalid input data" });
     }
 
-    res.status(200).json(chat.messages);
-  } catch (error) {
-    console.error("Error fetching messages:", error.message);
-    res.status(500).json({ message: "Error fetching messages" });
+    const newFAQs = await FAQ.insertMany(faqs);
+
+    res.status(201).json({ message: "FAQs added successfully", data: newFAQs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
-// Get all chats for a customer
-export const getCustomerChats = async (req, res) => {
+
+export const bulkDeleteFAQs = async (req, res) => {
   try {
-    const chats = await Chat.find({ customer: req.params.customerId })
-      .populate("messages")
-      .populate("manager");
-
-    if (!chats || chats.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No chats found for this customer" });
-    }
-
-    res.status(200).json(chats);
-  } catch (error) {
-    console.error("Error fetching customer chats:", error.message);
-    res.status(500).json({ message: "Error fetching customer chats" });
+    const { ids } = req.body;
+    const faqs = await FAQ.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: "FAQs deleted successfully", data: faqs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
-// Get all chats for a manager
-export const getManagerChats = async (req, res) => {
+
+export const getFAQ = async (req, res) => {
   try {
-    const chats = await Chat.find({ manager: req.params.managerId })
-      .populate("messages")
-      .populate("customer");
-
-    if (!chats || chats.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No chats found for this manager" });
-    }
-
-    res.status(200).json(chats);
-  } catch (error) {
-    console.error("Error fetching manager chats:", error.message);
-    res.status(500).json({ message: "Error fetching manager chats" });
-  }
-};
-
-// Close a chat
-export const closeChat = async (req, res) => {
-  try {
-    const chat = await Chat.findByIdAndUpdate(
-      req.params.chatId,
-      { status: "closed" },
-      { new: true }
-    );
-
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
-
-    res.status(200).json({ message: "Chat closed successfully", chat });
-  } catch (error) {
-    console.error("Error closing chat:", error.message);
-    res.status(500).json({ message: "Error closing chat" });
+    const faqs = await FAQ.find({});
+    res.json(faqs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
   }
 };

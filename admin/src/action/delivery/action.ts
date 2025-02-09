@@ -1,10 +1,10 @@
 "use server";
 
-import { DeliveryPersonType } from "@/types/delivery-person/delivery";
 import axiosInstance from "../axiosInstance";
 import getErrorMessage from "../getErrorMessage";
+import { Deliveryusertype } from "@/types/delivery-person/delivery";
 
-export async function useAddDeliveryPerson(data: DeliveryPersonType) {
+export async function AddDeliveryPerson(data: Deliveryusertype) {
   try {
     const response = await axiosInstance.post("deliverypersons/", data);
     console.log("response", response.data);
@@ -18,7 +18,7 @@ export async function useAddDeliveryPerson(data: DeliveryPersonType) {
   }
 }
 
-export async function useFetchAllDeliveryPersons() {
+export async function FetchAllDeliveryPersons() {
   try {
     const response = await axiosInstance.get("deliverypersons/");
     return {
@@ -31,7 +31,7 @@ export async function useFetchAllDeliveryPersons() {
   }
 }
 
-export async function useFetchDeliveryPersonById(id: string) {
+export async function FetchDeliveryPersonById(id: string) {
   try {
     const response = await axiosInstance.get(`deliverypersons/${id}`);
     return {
@@ -44,7 +44,7 @@ export async function useFetchDeliveryPersonById(id: string) {
   }
 }
 
-export async function useUpdateDeliveryPerson(id: string, data: DeliveryPersonType) {
+export async function UpdateDeliveryPerson(id: string, data: Deliveryusertype) {
   try {
     const response = await axiosInstance.put(`deliverypersons/${id}`, data);
     return {
@@ -57,7 +57,21 @@ export async function useUpdateDeliveryPerson(id: string, data: DeliveryPersonTy
   }
 }
 
-export async function useDeleteDeliveryPerson(id: string) {
+export async function BlockDeliveryPerson({ id }: { id: string }) {
+  try {
+    const response = await axiosInstance.put(`deliverypersons/block/${id}`);
+
+    return {
+      ok: true,
+      message: "Delivery Person blocked successfully",
+      data: response.data,
+    };
+  } catch (error: any) {
+    return { ok: false, message: getErrorMessage(error) };
+  }
+}
+
+export async function DeleteDeliveryPerson({ id }: { id: string }) {
   try {
     const response = await axiosInstance.delete(`deliverypersons/${id}`);
     return {

@@ -68,3 +68,24 @@ export async function DeleteOrder(id: string) {
     return { ok: false, message: getErrorMessage(error) };
   }
 }
+
+export async function SetDeliveryOrder({
+  id,
+  data,
+}: {
+  id: string;
+  data: string;
+}) {
+  try {
+    const response = await axiosInstance.patch(`orders/delivery/${id}`, {
+      deliveryPerson: data,
+    });
+    return {
+      ok: true,
+      message: "Order updated successfully",
+      data: response.data,
+    };
+  } catch (error: any) {
+    return { ok: false, message: getErrorMessage(error) };
+  }
+}

@@ -99,6 +99,16 @@ const SideBar = (props: Props) => {
               <Users className="h-4 w-4" />
               Delivery
             </Link>
+            <Link
+              href="/faq"
+              onClick={() => handleLinkClick("/faq")}
+              className={`flex items-center gap-3 rounded-lg ${
+                selectedLink === "/faq" ? "bg-muted" : ""
+              } px-3 py-2 transition-all hover:text-primary`}
+            >
+              <Users className="h-4 w-4" />
+              FAQ
+            </Link>
           </nav>
         </div>
       </div>

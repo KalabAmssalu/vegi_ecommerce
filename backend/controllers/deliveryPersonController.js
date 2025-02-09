@@ -65,7 +65,25 @@ export const getAllDeliveryPersons = async (req, res) => {
     res.status(500).json({ message: "Error fetching delivery persons" });
   }
 };
+export const blockDeliveryPerson = async (req, res) => {
+  try {
+    const { id } = req.params; // Correct way to access the `id` parameter
+    const deliveryPerson = await DeliveryPerson.findById(id);
 
+    if (!deliveryPerson) {
+      return res.status(404).json({ message: "Delivery person not found" });
+    }
+
+    // Toggle the `isBlocked` status
+    deliveryPerson.isBlocked = !deliveryPerson.isBlocked;
+    await deliveryPerson.save();
+
+    res.status(200).json({ message: "Delivery person blocked successfully" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error blocking delivery person" });
+  }
+};
 // Get a delivery person by ID
 export const getDeliveryPersonById = async (req, res) => {
   try {

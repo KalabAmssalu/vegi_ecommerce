@@ -13,6 +13,13 @@ const deliveryPersonSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    orderHistory: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Order",
+        required: false,
+      },
+    ],
   },
   {
     timestamps: true,

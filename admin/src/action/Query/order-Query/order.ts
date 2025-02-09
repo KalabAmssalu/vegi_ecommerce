@@ -2,7 +2,9 @@ import {
   FetchAllOrders,
   FetchMyOrdersByID,
   fetchRecentOrders,
+  SetDeliveryOrder,
 } from "@/action/order/action";
+import useToastMutation from "@/hooks/useToastMutation";
 import { OrderType } from "@/types/order/order";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -50,4 +52,26 @@ export const useFetchMyOrdersByID = (id: string) => {
       }
     },
   });
+};
+
+export const useUpdateDeliveryOrder = () => {
+  return useToastMutation<{ id: string; data: string }>(
+    "addProduct",
+    SetDeliveryOrder,
+    "product creating ...",
+    {
+      onSuccess: (data, variables) => {
+        // 'data' contains the response from the server
+        // 'variables' contains the broker data you passed in
+        console.log("delivery order data", data);
+        console.log("New delivery order Data:", variables);
+
+        // queryClient.invalidateQueries({ queryKey: ["brokers"] });
+        // Example: Display a message with the broker name
+      },
+      onError: (error) => {
+        console.error("Error creating delivery order:", error.response.data);
+      },
+    }
+  );
 };

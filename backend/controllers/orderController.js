@@ -192,6 +192,48 @@ export const updateOrder = async (req, res) => {
   }
 };
 
+export const SetDeliveryOrder = async (req, res) => {
+  const { deliveryPerson } = req.body;
+
+  // If no deliveryPerson is provided, return a bad request response
+  if (!deliveryPerson) {
+    return res.status(400).json({ message: "No delivery person provided" });
+  }
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { deliveryPerson }, // Only update the deliveryPerson field
+      { new: true, runValidators: true }
+    )
+      .populate("customer")
+      .populate("products.product")
+      .populate("deliveryPerson");
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Find the corresponding DeliveryPerson and update their orderHistory
+    const deliveryPersonRecord = await DeliveryPerson.findById(deliveryPerson);
+
+    if (!deliveryPersonRecord) {
+      return res.status(404).json({ message: "Delivery person not found" });
+    }
+
+    // Add the order ID to the delivery person's orderHistory
+    deliveryPersonRecord.orderHistory.push(updatedOrder._id);
+
+    // Save the updated DeliveryPerson record
+    await deliveryPersonRecord.save();
+
+    res.status(200).json(updatedOrder);
+  } catch (error) {
+    console.error(error.message);
+    res.status(400).json({ message: "Error updating order" });
+  }
+};
+
 // Delete an order
 export const deleteOrder = async (req, res) => {
   try {

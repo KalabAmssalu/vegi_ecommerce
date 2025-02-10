@@ -51,6 +51,25 @@ export const useVerifyPayment = () => {
   });
 };
 
+export const useUpdateStatus = () => {
+  return useMutation({
+    mutationKey: ["updateStatus"],
+    mutationFn: async ({ id, status }) => {
+      if (!id) {
+        throw new Error("Order ID is required");
+      }
+      console.log("id", id);
+      console.log("status", status);
+      const response = await axiosInstance.patch(`/orders/status/${id}`, {
+        status,
+      });
+
+      console.log("response", response);
+      return response.data;
+    },
+  });
+};
+
 export const useFetchMyOrders = () => {
   return useQuery({
     queryKey: ["myorders"],
@@ -70,3 +89,12 @@ export const useFetchMyOrdersByID = (id) => {
   });
 };
 
+export const useFetchMyDeliveryOrders = () => {
+  return useQuery({
+    queryKey: ["myDeliveryorders"],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/deliverypersons/myorders`);
+      return response.data;
+    },
+  });
+};

@@ -2,6 +2,7 @@ import DeliveryPerson from "../models/deliveryPerson.js";
 import bcrypt from "bcryptjs"; // For hashing passwords
 import { validationResult } from "express-validator";
 import User from "../models/user.js";
+import Order from "../models/order.js";
 // Create a new delivery person
 export const createDeliveryPerson = async (req, res) => {
   try {
@@ -135,5 +136,65 @@ export const deleteDeliveryPerson = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Error deleting delivery person" });
+  }
+};
+
+// export const getOrdersForDeliveryPerson = async (req, res) => {
+//   try {
+//     const userId = req.user.userId; // Get the authenticated delivery person's ID
+
+//     console.log("Fetching orders for delivery person:", userId);
+
+//     // Find all orders assigned to this delivery person
+//     const orders = await Order.find({ deliveryPerson: userId })
+//       .populate("customer") // Get customer details
+//       .populate("products.product") // Get product details
+//       .populate("deliveryPerson"); // Get delivery person details
+
+//     if (!orders.length) {
+//       return res
+//         .status(404)
+//         .json({ message: "No orders assigned to this delivery person" });
+//     }
+
+//     res.status(200).json(orders);
+//   } catch (error) {
+//     console.error("Error fetching orders:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+export const getOrdersForDeliveryPerson = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Get the logged-in delivery person's user ID
+
+    console.log("Fetching orders for delivery person:", userId);
+
+    // Find the delivery person by user ID
+    const deliveryPerson = await DeliveryPerson.findOne({ user: userId });
+
+    if (!deliveryPerson) {
+      return res.status(404).json({ message: "Delivery person not found" });
+    }
+
+    // Extract orderHistory array (order IDs)
+    const orderIds = deliveryPerson.orderHistory;
+
+    if (!orderIds.length) {
+      return res
+        .status(404)
+        .json({ message: "No orders assigned to this delivery person" });
+    }
+
+    // Fetch orders that match the order IDs in orderHistory
+    const orders = await Order.find({ _id: { $in: orderIds } })
+      .populate("customer") // Get customer details
+      .populate("products.product") // Get product details
+      .populate("deliveryPerson"); // Get delivery person details
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

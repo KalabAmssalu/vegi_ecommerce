@@ -6,6 +6,7 @@ import {
   updateDeliveryPerson,
   deleteDeliveryPerson,
   blockDeliveryPerson,
+  getOrdersForDeliveryPerson,
 } from "../controllers/deliveryPersonController.js";
 import auth from "../middleware/auth.js";
 import authorize from "../middleware/authorization.js";
@@ -32,6 +33,12 @@ router.put(
   auth, // Authenticate the user
   authorize("deliverypeople", "WRITE"), // Authorize based on the user's role
   blockDeliveryPerson
+);
+router.get(
+  "/myorders",
+  auth,
+  authorize("deliverypeople", "READ"),
+  getOrdersForDeliveryPerson
 );
 // Get a delivery person by ID (Admin, Manager, or the DeliveryPerson themselves)
 router.get(

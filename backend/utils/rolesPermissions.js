@@ -52,11 +52,12 @@ const rolesPermissions = {
       users: [ACTIONS.READ, ACTIONS.WRITE, ACTIONS.DELETE],
     },
   },
-  deliveryPerson: {
+  delivery: {
     resources: {
       orders: [ACTIONS.READ, ACTIONS.WRITE],
       customers: [ACTIONS.READ],
       users: [ACTIONS.READ, ACTIONS.WRITE, ACTIONS.DELETE],
+      deliverypeople: [ACTIONS.READ, ACTIONS.WRITE, ACTIONS.DELETE],
     },
   },
   customer: {

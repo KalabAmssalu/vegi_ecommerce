@@ -8,7 +8,6 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Wishlist from "./components/modules/Whishlist";
 import Cart from "./components/modules/Cart";
 import ProductList from "./components/modules/ProductList";
-import DeliveryPersonOrderDetail from "./components/modules/Dashboard/DeliveryOrderDetail";
 import ProductListTable from "./components/modules/Dashboard/ProductList";
 import ProductDetailMerchant from "./components/modules/Dashboard/ProductDetailMerchant";
 import CustomerOrderList from "./components/modules/CustomerOrderList";
@@ -161,14 +160,7 @@ const App = () => (
             </PrivateRoute>
           }
         />
-        <Route
-          path="/delivery-order/:id"
-          element={
-            <PrivateRoute>
-              <DeliveryPersonOrderDetail />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/delivery-list"
           element={

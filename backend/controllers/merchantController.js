@@ -100,7 +100,7 @@ export const toggleVerified = async (req, res) => {
 };
 
 export const getMyOrders = async (req, res) => {
-  try {
+  try { 
     const userId = req.user.userId;
 
     // Find the merchant by the user ID

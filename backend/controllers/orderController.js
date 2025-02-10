@@ -130,6 +130,26 @@ export const getMyOrderById = async (req, res) => {
   }
 };
 
+export const updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    console.log("Order ID:", req.params.id);
+
+    console.log("status", status);
+    const order = await Order.findById(req.params.id);
+    console.log("order", order);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    order.status = status;
+    await order.save();
+    res.status(200).json({ message: "Order status updated successfully" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Error updating order status" });
+  }
+};
+
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)

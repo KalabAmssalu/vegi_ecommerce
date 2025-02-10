@@ -1,10 +1,8 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
   useFetchMyDeliveryOrders,
   useUpdateStatus,
 } from "../../../api/order/action";
-
-// Mock data for demonstration - replace with your actual data fetching logic
 
 const getStatusColor = (status) => {
   switch (status.toLowerCase()) {
@@ -12,8 +10,6 @@ const getStatusColor = (status) => {
       return "bg-emerald-100 text-emerald-700";
     case "pending":
       return "bg-yellow-100 text-yellow-700";
-    case "processing":
-      return "bg-blue-100 text-blue-700";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -22,13 +18,12 @@ const getStatusColor = (status) => {
 const DeliveryListTable = () => {
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [isDelivered, setIsDelivered] = useState(false);
   const { data: deliveries } = useFetchMyDeliveryOrders();
 
   const openDialog = (delivery) => {
     setSelectedDelivery(delivery);
-    setNewStatus(delivery.status);
+    setIsDelivered(delivery.status === "delivered");
     setIsDialogOpen(true);
   };
 
@@ -38,14 +33,11 @@ const DeliveryListTable = () => {
   };
 
   const { mutate: updateStatus } = useUpdateStatus();
+
   const handleStatusUpdate = () => {
-    startTransition(() => {
-      // Here you would typically make an API call to update the status
-      console.log("Status updated to:", newStatus);
-      const data = { id: selectedDelivery._id, status: newStatus };
-      updateStatus(data);
-      closeDialog();
-    });
+    const newStatus = isDelivered ? "delivered" : "pending";
+    updateStatus({ id: selectedDelivery._id, status: newStatus });
+    closeDialog();
   };
 
   return (
@@ -140,25 +132,29 @@ const DeliveryListTable = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  product Name
+                  Product Name
                 </label>
                 <p className="mt-1 text-sm text-gray-900">
                   {selectedDelivery?.products[0].product.name}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Status
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">
+                  Mark as Delivered
                 </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                <button
+                  onClick={() => setIsDelivered(!isDelivered)}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isDelivered ? "bg-emerald-600" : "bg-gray-200"
+                  }`}
                 >
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                </select>
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      isDelivered ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
@@ -170,8 +166,7 @@ const DeliveryListTable = () => {
               </button>
               <button
                 onClick={handleStatusUpdate}
-                disabled={isPending}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50"
               >
                 Update Status
               </button>

@@ -32,10 +32,8 @@ const Checkout = () => {
       currency: "ETB",
       ...formData,
     };
-    createPayment(data,{
-      onSuccess: (data) => {
-        
-      },
+    createPayment(data, {
+      onSuccess: (data) => {},
       onError: (error) => {
         console.log(error);
       },
@@ -64,7 +62,7 @@ const Checkout = () => {
           <hr className="my-2" />
 
           <div className="flex justify-between text-gray-700">
-            <span>Shipping</span>
+            <span>Delivery Fee</span>
             <span>{formatCurrency(shippingCost)}</span>
           </div>
           <hr className="my-2" />
@@ -157,7 +155,6 @@ const Checkout = () => {
               className="p-3 border rounded-lg w-full"
             >
               <option value="chapa">Chapa</option>
-            
             </select>
           </div>
 

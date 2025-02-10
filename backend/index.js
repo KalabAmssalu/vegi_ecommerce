@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import cookieParser from 'cookie-parser';
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -55,6 +55,7 @@ import adminUserRoutes from "./routes/adminUserRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import managerRoutes from "./routes/managerRoutes.js";
 import statusRoutes from "./routes/statusRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 
 app.use("/api/adminusers", adminUserRoutes);
 app.use("/api/managers", managerRoutes);
@@ -75,6 +76,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/stat", statusRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 const PORT = process.env.PORT || 5000;
 

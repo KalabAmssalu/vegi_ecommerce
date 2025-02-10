@@ -1,16 +1,5 @@
 ## BACKEND DEVELOPMENT TESTING
 
-- [x] AUTHORIZATION AND AUTHENTICATION MIDDLEWARE SETUP CORRECTION
-- [x] ADMIN MODEL TEST
-- [x] ADMIN LOGIN TEST
-- [x] FILE UPLOADER TEST WITH A FORM DATA
-- [x] MODEL RELATION TESTING
-- [x] ROLE BASED LOGIN SYSTEM WITH FRONTEND AND BACKEND
 
-Major Functionality
--[x] Cart system
-Chat
--[x] Filtering price
-delivery assign
-payment integration chapa
-product review
+- Monthly subscription
+

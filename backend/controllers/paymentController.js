@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
-import Customer from "../models/customer.js";
+
 import Order from "../models/order.js";
 import axios from "axios";
 
 import Payment from "../models/payment.js";
 import { Chapa } from "chapa-nodejs";
 import Product from "../models/product.js";
-import Merchant from "../models/merchant.js";
+import Customer from "../models/Customer.js";
+import Merchant from "../models/Merchant.js";
+
 // Create Payment Endpoint
 export const createPayment = async (req, res) => {
   const chapa = new Chapa({
@@ -193,7 +195,7 @@ export const verifyPayment = async (req, res) => {
     // Update order status
     await Order.findByIdAndUpdate(payment.order, {
       payment_status: true,
-      status: "confirmed",
+      status: "payed",
     });
 
     console.log(`Payment ${payment.tx_ref} marked as PAID`);

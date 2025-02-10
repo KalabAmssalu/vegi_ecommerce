@@ -1,6 +1,7 @@
 // src/components/SubscriptionPage.js
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 const SubscriptionPage = () => {
   const location = useLocation();
@@ -9,9 +10,7 @@ const SubscriptionPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
+    phoneNumber: "",
   });
 
   useEffect(() => {
@@ -28,11 +27,21 @@ const SubscriptionPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here (e.g., send data to server)
-    console.log("Form Data:", formData);
-    console.log("Selected Plan:", selectedPlan);
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/subscription/subscribe`,
+        {
+          ...formData,
+          selectedPlan,
+        }
+      );
+      // Redirect to Chapa payment URL
+      window.location.href = response.data.checkoutUrl;
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -43,10 +52,14 @@ const SubscriptionPage = () => {
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="name"
+            >
               Full Name
             </label>
             <input
+              id="name"
               type="text"
               name="name"
               value={formData.name}
@@ -57,10 +70,14 @@ const SubscriptionPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="email"
+            >
               Email Address
             </label>
             <input
+              id="email"
               type="email"
               name="email"
               value={formData.email}
@@ -71,10 +88,32 @@ const SubscriptionPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="phoneNumber"
+            >
+              Phone Number
+            </label>
+            <input
+              id="phoneNumber"
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Phone Number"
+            />
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="plan"
+            >
               Selected Plan
             </label>
             <select
+              id="plan"
               value={selectedPlan}
               onChange={(e) => setSelectedPlan(e.target.value)}
               className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -83,50 +122,6 @@ const SubscriptionPage = () => {
               <option value="standard">Standard - $19.99/month</option>
               <option value="premium">Premium - $29.99/month</option>
             </select>
-          </div>
-          <div className="flex gap-4">
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">
-                Card Number
-              </label>
-              <input
-                type="text"
-                name="cardNumber"
-                value={formData.cardNumber}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Card Number"
-              />
-            </div>
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">
-                Expiry Date
-              </label>
-              <input
-                type="text"
-                name="expiryDate"
-                value={formData.expiryDate}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="MM/YY"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              CVV
-            </label>
-            <input
-              type="text"
-              name="cvv"
-              value={formData.cvv}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="CVV"
-            />
           </div>
           <button
             type="submit"

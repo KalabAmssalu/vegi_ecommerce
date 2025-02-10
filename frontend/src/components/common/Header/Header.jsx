@@ -48,7 +48,7 @@ const Header = () => {
                 </a>
               </li>
             ))}
-            {userInfo.role !== "customer" && (
+            {userInfo.role === "delivery" || userInfo.role === "merchant" ? (
               <li>
                 <Link
                   to="/dashboard"
@@ -57,7 +57,7 @@ const Header = () => {
                   Dashboard
                 </Link>
               </li>
-            )}
+            ) : null}
           </ul>
         </nav>
       </div>

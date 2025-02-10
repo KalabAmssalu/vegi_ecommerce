@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   FaUser,
@@ -17,7 +18,6 @@ import { useFetchMyOrdersByID } from "../../../api/order/action";
 const OrderDetail = () => {
   const { id } = useParams();
   const { data: order, isLoading, isError } = useFetchMyOrdersByID(id);
-  console.log("order", order);
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ const OrderDetail = () => {
             <div className="mt-4 space-y-2 text-gray-700">
               <p>
                 <span className="font-medium">Total Amount:</span>{" "}
-                {order.totalAmount} {/* You can format it if necessary */}
+                {order?.totalAmount} {/* You can format it if necessary */}
               </p>
               <p>
                 <span className="font-medium">Order Date:</span>{" "}
@@ -117,19 +117,19 @@ const OrderDetail = () => {
                   <div key={index}>
                     <p>
                       <span className="font-medium">Product Name:</span>{" "}
-                      {product.product.name}
+                      {product.product?.name || "N/A"}
                     </p>
                     <p>
                       <span className="font-medium">Description:</span>{" "}
-                      {product.product.description}
+                      {product.product?.description || "N/A"}
                     </p>
                     <p>
                       <span className="font-medium">Quantity:</span>{" "}
-                      {product.quantity}
+                      {product.quantity || "N/A"}
                     </p>
                     <p>
                       <span className="font-medium">Price:</span>{" "}
-                      {product.price}
+                      {product.price || "N/A"}
                     </p>
                     <hr className="my-4" />
                   </div>

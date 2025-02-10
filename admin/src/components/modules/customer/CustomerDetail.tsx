@@ -177,7 +177,7 @@ const CustomerDashboard = ({ id }: Props) => {
               <CardContent>
                 <Button
                   variant="outline"
-                  className={`w-full mb-2 ${customer.isBlocked ? "bg-red-500" : "bg-green-500"}`}
+                  className={`w-full mb-2 ${!customer.isBlocked ? "bg-red-500" : "bg-green-500"}`}
                   onClick={() => handleDeactivateAccount()}
                 >
                  {customer.isBlocked ? "Activate Account" : "Deactivate Account"}

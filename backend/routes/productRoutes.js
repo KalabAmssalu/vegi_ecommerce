@@ -8,6 +8,7 @@ import {
   getMyProduct,
   getMyProductsById,
   createProductFromMerchant,
+  upadateOnlyFields,
 } from "../controllers/productController.js"; // Adjust the path as necessary
 import upload from "../config/multerconfig.js";
 import auth from "../middleware/auth.js";
@@ -67,6 +68,13 @@ router.put(
   (req, res, next) =>
     authorize(req.user.role, "products", "WRITE")(req, res, next),
   updateProduct
+);
+
+router.patch(
+  "/:id",
+  auth, // First authenticate the user
+  authorize("products", "WRITE"),
+  upadateOnlyFields
 );
 
 // Delete a product by ID (Merchant only)

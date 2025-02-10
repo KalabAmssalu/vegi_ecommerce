@@ -1,4 +1,3 @@
-import axiosInstance from "@/action/axiosInstance";
 import {
   DeactivateCustomer,
   FetchAllCustomers,
@@ -6,7 +5,7 @@ import {
 } from "@/action/customer/action";
 import useToastMutation from "@/hooks/useToastMutation";
 import { CustomerType } from "@/types/customer/customer";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { toast } from "sonner";
 

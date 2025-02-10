@@ -2,40 +2,20 @@ import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { addToCart } from "../../../slices/cartSlice";
+import { addToCart, addToCartWithQuantity } from "../../../slices/cartSlice";
 import Back from "../../common/Back";
 import Header from "../../common/Header/Header";
 import { ChevronLeft, Minus, Plus, ShoppingCart, Star } from "lucide-react";
-import { cn } from "../../../lib/utils";
 import toast from "react-hot-toast";
 import Footer from "../../common/Footer/Footer";
-import { useFetchMyProductsById } from "../../../api/product/action";
+import { useFetchProductsById } from "../../../api/product/action";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { data: product } = useFetchMyProductsById(id);
+  const { data: product } = useFetchProductsById(id);
   const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("description");
-
-  // Mock product data (replace with your actual data fetching)
-  // const product = {
-  //   id: 1,
-  //   name: "Organic Broccoli",
-  //   price: 3.99,
-  //   description: "Fresh organic broccoli from local farms",
-  //   category: "Vegetables",
-  //   image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c",
-  //   longDescription:
-  //     "Our premium organic broccoli is sourced directly from certified organic farms. Each head is carefully selected for freshness and quality, ensuring you get the best produce for your healthy lifestyle.",
-  //   specs: {
-  //     weight: "1 Kg",
-  //     origin: "Local Organic Farm",
-  //     quality: "Premium Grade",
-  //     certification: "USDA Organic",
-  //   },
-  // };
 
   const handleQuantityChange = (type) => {
     if (type === "decrease" && quantity > 1) {
@@ -46,7 +26,7 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    dispatch(addToCart({ ...product, quantity }));
+    dispatch(addToCartWithQuantity({ ...product, quantity }));
     toast.success("Added to cart successfully!");
   };
 
@@ -138,51 +118,6 @@ const ProductDetail = () => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Tabs Section */}
-          <div className="mt-16">
-            <div className="border-b border-gray-200">
-              <div className="flex space-x-8">
-                <button
-                  onClick={() => setActiveTab("description")}
-                  className={cn(
-                    "tab-button",
-                    activeTab === "description" && "active"
-                  )}
-                >
-                  Description
-                </button>
-                <button
-                  onClick={() => setActiveTab("specifications")}
-                  className={cn(
-                    "tab-button",
-                    activeTab === "specifications" && "active"
-                  )}
-                >
-                  Specifications
-                </button>
-              </div>
-            </div>
-            <div className="mt-8">
-              {activeTab === "description" ? (
-                <p className="text-gray-600 leading-relaxed">
-                  {product?.longDescription}
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {Object.entries(product?.specs).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex justify-between py-3 border-b border-gray-100"
-                    >
-                      <span className="font-medium text-gray-900">{key}</span>
-                      <span className="text-gray-600">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>

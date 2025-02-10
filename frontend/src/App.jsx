@@ -15,6 +15,7 @@ import OrderDetail from "./components/modules/Dashboard/OrderDetail";
 import Checkout from "./components/modules/Checkout";
 import PaymentSuccess from "./components/common/PaymentSuccess";
 import PaymentFailed from "./components/common/PaymentFailed";
+import SubscriptionSuccess from "./components/screens/Subscription/success";
 
 // Lazy-loaded components
 const Landing = lazy(() => import("./components/screens/landingPage/Landing"));
@@ -96,6 +97,7 @@ const App = () => (
         <Route path="/Subscription" element={<SubscriptionPage />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
+        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route
           path="/dashboard"
           element={

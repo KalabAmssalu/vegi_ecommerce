@@ -1,12 +1,17 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/hooks/storehooks";
+import { current } from "@reduxjs/toolkit";
 import {
   Bell,
+  CircleUser,
   Home,
   Package,
   Package2,
   ShoppingCart,
+  Truck,
+  UserCog,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +20,7 @@ import { useState } from "react";
 type Props = {};
 
 const SideBar = (props: Props) => {
+  const { currentUser } = useAppSelector((state) => state.currentUser);
   const [selectedLink, setSelectedLink] = useState<string>("");
 
   const handleLinkClick = (link: string) => {
@@ -55,9 +61,7 @@ const SideBar = (props: Props) => {
             >
               <ShoppingCart className="h-4 w-4" />
               Orders
-              <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                6
-              </Badge>
+             
             </Link>
             <Link
               href="/product"
@@ -76,7 +80,7 @@ const SideBar = (props: Props) => {
                 selectedLink === "/customer" ? "bg-muted" : ""
               } px-3 py-2 transition-all hover:text-primary`}
             >
-              <Users className="h-4 w-4" />
+              <CircleUser className="h-4 w-4" />
               Customers
             </Link>
             <Link
@@ -89,6 +93,18 @@ const SideBar = (props: Props) => {
               <Users className="h-4 w-4" />
               Merchants
             </Link>
+            {currentUser.role === "admin" && (
+              <Link
+                href="/manager"
+                onClick={() => handleLinkClick("/manager")}
+                className={`flex items-center gap-3 rounded-lg ${
+                  selectedLink === "/manager" ? "bg-muted" : ""
+                } px-3 py-2 transition-all hover:text-primary`}
+              >
+                <UserCog className="h-4 w-4" />
+                Manager
+              </Link>
+            )}
             <Link
               href="/delivery"
               onClick={() => handleLinkClick("/delivery")}
@@ -96,19 +112,21 @@ const SideBar = (props: Props) => {
                 selectedLink === "/delivery" ? "bg-muted" : ""
               } px-3 py-2 transition-all hover:text-primary`}
             >
-              <Users className="h-4 w-4" />
+              <Truck className="h-4 w-4" />
               Delivery
             </Link>
-            <Link
-              href="/faq"
-              onClick={() => handleLinkClick("/faq")}
-              className={`flex items-center gap-3 rounded-lg ${
-                selectedLink === "/faq" ? "bg-muted" : ""
-              } px-3 py-2 transition-all hover:text-primary`}
-            >
-              <Users className="h-4 w-4" />
-              FAQ
-            </Link>
+            {currentUser.role === "admin" && (
+              <Link
+                href="/faq"
+                onClick={() => handleLinkClick("/faq")}
+                className={`flex items-center gap-3 rounded-lg ${
+                  selectedLink === "/faq" ? "bg-muted" : ""
+                } px-3 py-2 transition-all hover:text-primary`}
+              >
+                <Users className="h-4 w-4" />
+                FAQ
+              </Link>
+            )}
           </nav>
         </div>
       </div>

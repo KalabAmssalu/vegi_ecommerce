@@ -1,25 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { addToCart } from "../../../slices/cartSlice";
+
 import Back from "../../common/Back";
 import Header from "../../common/Header/Header";
 import Footer from "../../common/Footer/Footer";
-import { ChevronLeft, Minus, Plus, ShoppingCart, Star } from "lucide-react";
-import { cn } from "../../../lib/utils";
+import { ChevronLeft, Star } from "lucide-react";
 import toast from "react-hot-toast";
-import { useFetchMyProductsById } from "../../../api/product/action";
+import {
+  useDeleteProduct,
+  useFetchMyProductsById,
+  useUpdateProduct,
+} from "../../../api/product/action";
 
 const ProductDetailMerchant = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data: product } = useFetchMyProductsById(id);
+  const { data: product, isLoading, isError } = useFetchMyProductsById(id);
 
-  const [activeTab, setActiveTab] = useState("description");
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProduct, setEditedProduct] = useState({ ...product });
+  const [editedProduct, setEditedProduct] = useState({});
+
+  const { mutate: updateProduct } = useUpdateProduct();
+  const { mutate: deleteProduct } = useDeleteProduct();
+
+  useEffect(() => {
+    if (product) {
+      setEditedProduct({ ...product });
+    }
+  }, [product]);
 
   // Handle edit mode toggle
   const toggleEditMode = () => {
@@ -38,32 +48,53 @@ const ProductDetailMerchant = () => {
     }));
   };
 
-  // Handle image change (optional)
-  const handleImageChange = (e) => {
-    // const file = e.target.files[0];
-    // if (file) {
-    //   const reader = new FileReader();
-    //   reader.onloadend = () => {
-    //     setEditedProduct((prev) => ({
-    //       ...prev,
-    //       image: reader.result,
-    //     }));
-    //   };
-    //   reader.readAsDataURL(file);
-    // }
-  };
-
   // Handle save changes
   const handleSaveChanges = () => {
+    // Create an object with only the changed fields
+    const updatedFields = {};
+  
+    // Check for modified fields and add them to the updatedFields object
+    if (editedProduct?.name !== product?.name) updatedFields.name = editedProduct?.name;
+    if (editedProduct?.category?.name !== product?.category?.name) updatedFields.category = editedProduct?.category;
+    if (editedProduct?.description !== product?.description) updatedFields.description = editedProduct?.description;
+    if (editedProduct?.price !== product?.price) updatedFields.price = editedProduct?.price;
+    if (editedProduct?.quantity !== product?.quantity) updatedFields.quantity = editedProduct?.quantity;
+  
+    // Only update if there are any modified fields
+    if (Object.keys(updatedFields).length > 0) {
+      // Call your API to update the product with only the changed fields
+      updateProduct({ id, data: updatedFields });
+  
+      // Optional: Notify the user about the successful update
+      toast.success("Product updated successfully!");
+    } else {
+      // If no fields were changed, notify the user
+      toast.info("No changes were made.");
+    }
+  
+    // Exit editing mode
     setIsEditing(false);
-    toast.success("Product updated successfully!");
   };
+  
 
   // Handle delete product
   const handleDeleteProduct = () => {
     toast.success("Product deleted successfully!");
-    navigate("/products"); // Redirect to products page after deletion
+    deleteProduct({ id });
+    navigate("/product"); // Redirect to products page after deletion
   };
+
+  const handleImageChange = (e) => {
+    // Handle image change (you can implement this logic if required)
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a loading spinner
+  }
+
+  if (isError) {
+    return <div>Error fetching product details</div>;
+  }
 
   if (!product) {
     return <div>No product details available</div>; // Or some other fallback UI
@@ -208,79 +239,6 @@ const ProductDetailMerchant = () => {
                   <div className="flex items-center space-x-6"></div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Tabs Section */}
-          <div className="mt-16">
-            <div className="border-b border-gray-200">
-              <div className="flex space-x-8">
-                <button
-                  onClick={() => setActiveTab("description")}
-                  className={cn(
-                    "tab-button",
-                    activeTab === "description" && "active"
-                  )}
-                >
-                  Description
-                </button>
-                <button
-                  onClick={() => setActiveTab("specifications")}
-                  className={cn(
-                    "tab-button",
-                    activeTab === "specifications" && "active"
-                  )}
-                >
-                  Specifications
-                </button>
-              </div>
-            </div>
-            <div className="mt-8">
-              {activeTab === "description" ? (
-                isEditing ? (
-                  <textarea
-                    name="longDescription"
-                    value={editedProduct?.longDescription}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                ) : (
-                  <p className="text-gray-600 leading-relaxed">
-                    {product?.longDescription}
-                  </p>
-                )
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {Object.entries(
-                    isEditing ? editedProduct?.specs : product?.specs
-                  ).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex justify-between py-3 border-b border-gray-100"
-                    >
-                      <span className="font-medium text-gray-900">{key}</span>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={value}
-                          onChange={(e) =>
-                            setEditedProduct((prev) => ({
-                              ...prev,
-                              specs: {
-                                ...prev.specs,
-                                [key]: e.target.value,
-                              },
-                            }))
-                          }
-                          className="w-1/2 px-2 py-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      ) : (
-                        <span className="text-gray-600">{value}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

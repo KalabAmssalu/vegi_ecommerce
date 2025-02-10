@@ -214,6 +214,33 @@ export const updateProduct = async (req, res) => {
     res.status(400).json({ message: "Error updating product" });
   }
 };
+
+export const upadateOnlyFields = async (req, res) => {
+  const { id } = req.params; // Product ID from the URL
+  const updatedFields = req.body; // The updated fields from the request body
+
+  try {
+    // Check if the product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Update only the fields that are provided in the request body
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { $set: updatedFields }, // Only set the fields that are provided in updatedFields
+      { new: true, runValidators: true } // `new: true` returns the updated product, `runValidators: true` ensures schema validation
+    );
+
+    // Respond with the updated product
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 // Delete a product
 export const deleteProduct = async (req, res) => {
   try {

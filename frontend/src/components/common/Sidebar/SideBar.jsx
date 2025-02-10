@@ -8,16 +8,18 @@ const SideBar = ({ role, setCurrentView, currentView }) => {
     { id: "add-product", label: "Add Product", icon: <FaPlus /> },
     { id: "myproducts", label: "My Product", icon: <ShoppingBasket /> },
     { id: "orders", label: "Orders", icon: <FaList /> },
-    { id: "delivery-list", label: "Delivery List", icon: <FaTruck /> },
-    { id: "user-profile", label: "Profile", icon: <FaUser /> },
   ];
 
   const deliveryPersonTabs = [
     { id: "delivery-list", label: "Delivery List", icon: <FaTruck /> },
-    { id: "user-profile", label: "Profile", icon: <FaUser /> },
   ];
 
-  const tabs = role === "merchant" ? merchantTabs : deliveryPersonTabs;
+  const tabs =
+    role === "merchant"
+      ? merchantTabs
+      : role === "delivery"
+      ? deliveryPersonTabs
+      : "";
 
   return (
     <div className="p-4 space-y-2">

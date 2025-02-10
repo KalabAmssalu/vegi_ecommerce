@@ -2,7 +2,7 @@ import User from "../models/user.js";
 import bcrypt from "bcryptjs"; // For hashing passwords
 import path from "path"; // For handling file paths
 import Order from "../models/order.js";
-import Merchant from "../models/Merchant.js";
+import Merchant from "../models/merchant.js";
 
 // Register a new Merchant
 export const createMerchant = async (req, res) => {
@@ -100,7 +100,7 @@ export const toggleVerified = async (req, res) => {
 };
 
 export const getMyOrders = async (req, res) => {
-  try { 
+  try {
     const userId = req.user.userId;
 
     // Find the merchant by the user ID
@@ -124,10 +124,12 @@ export const getMyOrders = async (req, res) => {
     // Filter the products inside each order to include only the merchant's products
     const filteredOrders = orders
       .map((order) => {
-        const filteredProducts = order.products.filter((item) =>
-          merchant.products.some((merchantProductId) =>
-            merchantProductId.equals(item.product._id)
-          )
+        const filteredProducts = order.products.filter(
+          (item) =>
+            item.product &&
+            merchant.products.some((merchantProductId) =>
+              merchantProductId.equals(item.product._id)
+            )
         );
 
         return {

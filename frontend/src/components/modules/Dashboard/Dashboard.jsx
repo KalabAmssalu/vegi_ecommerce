@@ -8,9 +8,11 @@ import OrderList from "./OrderList";
 import DeliveryList from "./DeliveryList";
 import UserProfile from "../../screens/auth/user/UserProfile";
 import ProductListTable from "./ProductList";
+import { useSelector } from "react-redux";
 
-const Dashboard = ({ role = "merchant" }) => {
+const Dashboard = () => {
   const [currentView, setCurrentView] = useState("delivery-list");
+  const userInfo = useSelector((state) => state.user);
 
   const renderContent = () => {
     switch (currentView) {
@@ -38,13 +40,15 @@ const Dashboard = ({ role = "merchant" }) => {
       <div className="flex flex-1">
         {/* Sidebar */}
         <div className="w-64 bg-white border-r border-gray-200 shadow-sm">
-          <SideBar role={role} setCurrentView={setCurrentView} currentView={currentView} />
+          <SideBar
+            role={userInfo.role}
+            setCurrentView={setCurrentView}
+            currentView={currentView}
+          />
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-6 bg-gray-50">
-          {renderContent()}
-        </div>
+        <div className="flex-1 p-6 bg-gray-50">{renderContent()}</div>
       </div>
 
       {/* Footer */}

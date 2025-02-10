@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import axiosInstance from "../axiosInstance";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setPaymentData } from "../../slices/successSlice";
 
@@ -52,18 +52,20 @@ export const useVerifyPayment = () => {
 };
 
 export const useUpdateStatus = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["updateStatus"],
     mutationFn: async ({ id, status }) => {
       if (!id) {
         throw new Error("Order ID is required");
       }
-      console.log("id", id);
-      console.log("status", status);
+
       const response = await axiosInstance.patch(`/orders/status/${id}`, {
         status,
       });
-
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: ["myorders"] });
+      }
       console.log("response", response);
       return response.data;
     },

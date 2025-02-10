@@ -1,6 +1,7 @@
 import Manager from "../models/manager.js";
 import AdminUser from "../models/adminUser.js";
 import { validationResult } from "express-validator";
+import bcrypt from "bcryptjs";
 
 // Create Manager
 export const createManager = async (req, res) => {
@@ -11,22 +12,35 @@ export const createManager = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { user } = req.body;
+    const { role, firstName, lastName, email, password, phoneNumber, address } =
+      req.body;
 
     // Check if the user exists
-    const adminUser = await AdminUser.findById(user);
-    if (!adminUser) {
-      return res.status(404).json({ msg: "AdminUser not found" });
+    let adminUser = await AdminUser.findOne({ email });
+    if (adminUser) {
+      return res.status(404).json({ msg: "Manager already exists" });
     }
 
-    // Check if the manager already exists
-    let manager = await Manager.findOne({ user });
-    if (manager) {
-      return res.status(400).json({ msg: "Manager already exists" });
-    }
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create a new User
+    adminUser = new AdminUser({
+      role,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+      address,
+    });
+
+    // Save the User
+    await adminUser.save();
 
     // Create a new Manager
-    manager = new Manager({
+    const manager = new Manager({
       user: adminUser._id,
     });
 
@@ -65,24 +79,41 @@ export const getManagerById = async (req, res) => {
   }
 };
 
-// Update Manager
+
 export const updateManager = async (req, res) => {
-  const { isBlocked } = req.body;
+  const {
+    isBlocked,
+    role,
+    firstName,
+    lastName,
+    email,
+    password,
+    phoneNumber,
+    address,
+  } = req.body;
 
   try {
-    const updatedManager = await Manager.findByIdAndUpdate(
-      req.params.id,
-      { isBlocked },
-      { new: true, runValidators: true }
-    ).populate("user");
+    const manager = await Manager.findById(req.params.id).populate("user");
 
-    if (!updatedManager) {
+    if (!manager) {
       return res.status(404).json({ message: "Manager not found" });
     }
 
-    res
-      .status(200)
-      .json({ msg: "Manager updated successfully", updatedManager });
+    // Update the manager's `isBlocked` status
+    manager.isBlocked = isBlocked;
+
+    // Update the associated `AdminUser` fields
+    if (manager.user) {
+      await AdminUser.findByIdAndUpdate(
+        manager.user._id,
+        { role, firstName, lastName, email, password, phoneNumber, address },
+        { new: true, runValidators: true }
+      );
+    }
+
+    await manager.save();
+
+    res.status(200).json({ message: "Manager updated successfully", manager });
   } catch (error) {
     console.error(error.message);
     res.status(400).json({ message: "Error updating manager" });
